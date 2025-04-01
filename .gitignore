@@ -4,8 +4,8 @@
 /pitcernia_django/frontend/.pnp
 .pnp.js
 
+/venv
 /env
-
 # testing
 /pitcernia_django/frontend/coverage
 
