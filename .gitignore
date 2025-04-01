@@ -1,4 +1,4 @@
-
+.gitignore
 # dependencies
 /frontend/node_modules
 /pitcernia_django/frontend/node_modules
@@ -7,6 +7,9 @@
 /frontend/coverage
 /env
 /venv
+
+/venv
+/env
 # testing
 /pitcernia_django/frontend/coverage
 /frontend/coverage
