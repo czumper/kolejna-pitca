@@ -15,6 +15,11 @@ const MenuPage = () => {
   const [filters, setFilters] = useState({
     vegetarian: false,
     spicy: false,
+    size: {
+      small: false,
+      medium: false,
+      large: false,
+    }
   });
   const [showFilters, setShowFilters] = useState(false);
 
@@ -27,25 +32,42 @@ const MenuPage = () => {
   // When filter criteria changes, fetch filtered pizzas
   useEffect(() => {
     const params = {};
-
+  
     if (activeCategory !== "all") {
       params.category = activeCategory;
     }
-
+  
     if (searchQuery) {
       params.search = searchQuery;
     }
-
+  
     if (filters.vegetarian) {
       params.is_vegetarian = true;
     }
-
+  
     if (filters.spicy) {
       params.is_spicy = true;
     }
-
+  
+   
+    const selectedSizes = [];
+    if (filters.size.small) selectedSizes.push("small");
+    if (filters.size.medium) selectedSizes.push("medium");
+    if (filters.size.large) selectedSizes.push("large");
+  
+    if (selectedSizes.length > 0) {
+      params.size = selectedSizes.join(",");
+    } 
+  
     dispatch(fetchPizzas(params));
   }, [dispatch, activeCategory, searchQuery, filters]);
+
+  const getSelectedSize = () => {
+    if (filters.size.small) return "small";
+    if (filters.size.medium) return "medium";
+    if (filters.size.large) return "large";
+    return "medium"; 
+  };
 
   const handleCategoryChange = (categoryId) => {
     setActiveCategory(categoryId);
@@ -55,12 +77,7 @@ const MenuPage = () => {
     setSearchQuery(e.target.value);
   };
 
-  const handleFilterChange = (filter) => {
-    setFilters({
-      ...filters,
-      [filter]: !filters[filter],
-    });
-  };
+ 
 
   const handleClearFilters = () => {
     setActiveCategory("all");
@@ -68,7 +85,30 @@ const MenuPage = () => {
     setFilters({
       vegetarian: false,
       spicy: false,
+      size: { 
+        small: false,
+        medium: false,
+        large: false,
+      },
+
     });
+  };
+
+  const handleFilterChange = (filter, value) => {
+    if (filter === "size") {
+      setFilters({
+        ...filters,
+        size: {
+          ...filters.size,
+          [value]: !filters.size[value],
+        },
+      });
+    } else {
+      setFilters({
+        ...filters,
+        [filter]: !filters[filter],
+      });
+    }
   };
 
   // Check if any filters are active
@@ -126,6 +166,37 @@ const MenuPage = () => {
           <FilterLabel htmlFor="spicy">Ostra</FilterLabel>
         </FilterOption>
 
+        <FilterOption>
+  <CheckboxInput
+    type="checkbox"
+    id="small"
+    checked={filters.size.small}
+    onChange={() => handleFilterChange("size", "small")}
+  />
+  <FilterLabel htmlFor="small">Mała</FilterLabel>
+</FilterOption>
+
+<FilterOption>
+  <CheckboxInput
+    type="checkbox"
+    id="medium"
+    checked={filters.size.medium}
+    onChange={() => handleFilterChange("size", "medium")}
+  />
+  <FilterLabel htmlFor="medium">Średnia</FilterLabel>
+</FilterOption>
+
+<FilterOption>
+  <CheckboxInput
+    type="checkbox"
+    id="large"
+    checked={filters.size.large}
+    onChange={() => handleFilterChange("size", "large")}
+  />
+  <FilterLabel htmlFor="large">Duża</FilterLabel>
+</FilterOption>
+
+
         {isFiltering && (
           <ClearFiltersButton onClick={handleClearFilters}>
             <FaTimes /> Wyczyść filtry
@@ -166,7 +237,7 @@ const MenuPage = () => {
       ) : (
         <PizzasGrid>
           {pizzas.results?.map((pizza) => (
-            <PizzaCard key={pizza.id} pizza={pizza} />
+            <PizzaCard key={pizza.id} pizza={pizza} selectedSize={getSelectedSize()} />
           ))}
         </PizzasGrid>
       )}

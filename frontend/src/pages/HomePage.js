@@ -19,7 +19,7 @@ const HomePage = () => {
         <HeroContent>
           <h1>Świeża, zajebista piccerka kolo</h1>
           <p>Robiona na szybko byle była</p>
-          <HeroButton to="/menu">Order Now</HeroButton>
+          <HeroButton to="/menu">Zamów Teraz</HeroButton>
         </HeroContent>
       </HeroSection>
 
@@ -66,7 +66,7 @@ const HomeContainer = styled.div`
 
 const HeroSection = styled.section`
   background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-    url("/static/images/ppp.jpg");
+    url("/images/ppp.jpg");
   background-size: cover;
   background-position: center;
   height: 500px;

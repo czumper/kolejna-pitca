@@ -3,16 +3,29 @@ import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { FaLeaf, FaFire } from "react-icons/fa";
 
-const PizzaCard = ({ pizza }) => {
+const PizzaCard = ({ pizza, selectedSize = "medium" }) => {
   const {
     name,
     slug,
     description,
+    price_small,
     price_medium,
+    price_large,
     image,
     is_vegetarian,
     is_spicy,
   } = pizza;
+
+  const getPrice = () => {
+    switch (selectedSize) {
+      case "small":
+        return price_small;
+      case "large":
+        return price_large;
+      default:
+        return price_medium;
+    }
+  }
 
   return (
     <Card to={`/pizza/${slug}`}>
@@ -40,7 +53,7 @@ const PizzaCard = ({ pizza }) => {
         </PizzaDescription>
 
         <PriceRow>
-          <PizzaPrice>ZŁ{price_medium}</PizzaPrice>
+          <PizzaPrice>ZŁ{getPrice()}</PizzaPrice>
           <OrderButton>Zamów teraz</OrderButton>
         </PriceRow>
       </PizzaInfo>
