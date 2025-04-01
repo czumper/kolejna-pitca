@@ -3,7 +3,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
-from accounts.views import UserViewSet, AddressViewSet, RegisterView
+from accounts.views import UserViewSet, AddressViewSet, RegisterView, ActivateAccountView
 from menu.views import CategoryViewSet, ToppingViewSet, PizzaViewSet
 from orders.views import OrderViewSet, OrderTrackingView
 from reviews.views import ReviewViewSet
@@ -26,9 +26,10 @@ urlpatterns = [
     path('api/auth/', include('djoser.urls')),
     path('api/auth/', include('djoser.urls.jwt')),
     path('api/auth/register/', RegisterView.as_view(), name='register'),
+    path('api/auth/activate/<str:uidb64>/<str:token>/', ActivateAccountView.as_view(), name='account-activate'),
     path('api/orders/track/', OrderTrackingView.as_view(), name='order-tracking'),
     path('', TemplateView.as_view(template_name='index.html')),
-    path('', serve, {'document_root': settings.STATICFILES_DIRS[0], 'path': 'index.html'}),
+#    path('', serve, {'document_root': settings.STATICFILES_DIRS[0], 'path': 'index.html'}),
 ]
 
 # Serve media files in development
