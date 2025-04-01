@@ -1,0 +1,42 @@
+
+# dependencies
+/pitcernia_django/frontend/node_modules
+/pitcernia_django/frontend/.pnp
+.pnp.js
+
+/env
+
+# testing
+/pitcernia_django/frontend/coverage
+
+# production
+/pitcernia_django/frontend/build
+
+.env
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python
+*.pyc
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.vscode/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+.pytest_cache/
+cover/
