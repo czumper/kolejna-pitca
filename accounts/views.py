@@ -6,31 +6,26 @@ from .serializers import UserSerializer, AddressSerializer, UserRegistrationSeri
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.tokens import default_token_generator
 from rest_framework.views import APIView
+from django.utils.encoding import force_str
 
 
 class ActivateAccountView(APIView):
     permission_classes = [permissions.AllowAny]
-    
-    def post(self, request):
-        uid = request.data.get('uid')
-        token = request.data.get('token')
-        
+
+    def get(self, request, uidb64, token):
         try:
-            # Odkoduj uid z base64
-            uid = urlsafe_base64_decode(uid).decode()
+            uid = force_str(urlsafe_base64_decode(uidb64))
             user = User.objects.get(pk=uid)
-            
-            # Sprawdź czy token jest poprawny
-            if default_token_generator.check_token(user, token):
-                # Aktywuj konto
-                user.is_active = True
-                user.save()
-                return Response({"detail": "Konto zostało aktywowane."}, status=status.HTTP_200_OK)
-            else:
-                return Response({"detail": "Link aktywacyjny jest nieprawidłowy lub wygasł."}, status=status.HTTP_400_BAD_REQUEST)
         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-            return Response({"detail": "Link aktywacyjny jest nieprawidłowy."}, status=status.HTTP_400_BAD_REQUEST)
-        
+            return Response({"detail": "Nieprawidłowy link aktywacyjny."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if default_token_generator.check_token(user, token):
+            if user.is_active:
+                return Response({"detail": "Konto już aktywowane."}, status=status.HTTP_400_BAD_REQUEST)
+            user.is_active = True
+            user.save()
+            return Response({"detail": "Konto aktywowane pomyślnie."}, status=status.HTTP_200_OK)
+        return Response({"detail": "Link aktywacyjny nieprawidłowy lub wygasł."}, status=status.HTTP_400_BAD_REQUEST)     
 
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
