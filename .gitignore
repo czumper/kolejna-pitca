@@ -1,17 +1,18 @@
 
 # dependencies
+/frontend/node_modules
 /pitcernia_django/frontend/node_modules
-/pitcernia_django/frontend/.pnp
+/pitcernia_django/frontend/coverage
 .pnp.js
-
+/frontend/coverage
 /env
-
+/venv
 # testing
 /pitcernia_django/frontend/coverage
-
+/frontend/coverage
 # production
 /pitcernia_django/frontend/build
-
+/frontend/build
 .env
 
 # misc
