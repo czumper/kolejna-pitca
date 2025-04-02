@@ -14,8 +14,8 @@
 /pitcernia_django/frontend/coverage
 /frontend/coverage
 # production
-/pitcernia_django/frontend/build
-/frontend/build
+#/pitcernia_django/frontend/build
+#/frontend/build
 .env
 
 # misc
