@@ -53,7 +53,7 @@ const App = () => {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/activation" component={ActivationPage} />
-            <Route path="/activate/:uid/:token" component={ActivationPage} />
+            <Route path="/activation/:uid/:token" component={ActivationPage} />
 
             {/* Protected routes */}
             <Route
