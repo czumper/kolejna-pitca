@@ -8,7 +8,7 @@ router.register(r'users', UserViewSet, basename='user')
 urlpatterns = [
     path('', include(router.urls)),
     path('auth/register/', RegisterView.as_view(), name='register'),
-    path('auth/activation/<str:uidb64>/<str:token>/', ActivateAccountView.as_view(), name='account-activate'),
+    path('auth/activation/<str:uidb64>/<str:token>/', ActivateAccountView.as_view(), name='account-activation'),
     path('auth/password/change/', UserViewSet.as_view({'post': 'change_password'}), name='password-change'),
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.jwt')),
