@@ -64,13 +64,13 @@ const PizzaDetailPage = () => {
     let basePrice = 0;
 
     switch (size) {
-      case "small":
+      case "mała":
         basePrice = currentPizza.price_small;
         break;
-      case "medium":
+      case "średnia":
         basePrice = currentPizza.price_medium;
         break;
-      case "large":
+      case "duża":
         basePrice = currentPizza.price_large;
         break;
       default:
@@ -80,11 +80,11 @@ const PizzaDetailPage = () => {
     // Add toppings price
     const toppingsPrice = selectedToppings.reduce((sum, topping) => {
       switch (size) {
-        case "small":
+        case "mała":
           return sum + topping.price_small;
-        case "medium":
+        case "średnia":
           return sum + topping.price_medium;
-        case "large":
+        case "duża":
           return sum + topping.price_large;
         default:
           return sum + topping.price_medium;
@@ -99,9 +99,9 @@ const PizzaDetailPage = () => {
       id: topping.id,
       name: topping.name,
       price:
-        size === "small"
+        size === "mała"
           ? topping.price_small
-          : size === "medium"
+          : size === "średnia"
           ? topping.price_medium
           : topping.price_large,
     }));
@@ -111,9 +111,9 @@ const PizzaDetailPage = () => {
         pizza: currentPizza,
         size,
         price:
-          size === "small"
+          size === "mała"
             ? currentPizza.price_small
-            : size === "medium"
+            : size === "średnia"
             ? currentPizza.price_medium
             : currentPizza.price_large,
         quantity,
@@ -183,20 +183,20 @@ const PizzaDetailPage = () => {
             <OptionTitle>Wybierz rozmiar:</OptionTitle>
             <SizeOptions>
               <SizeButton
-                selected={size === "small"}
-                onClick={() => handleSizeChange("small")}
+                selected={size === "mała"}
+                onClick={() => handleSizeChange("mała")}
               >
                 Small ${formatPrice(currentPizza.price_small)}
               </SizeButton>
               <SizeButton
-                selected={size === "medium"}
-                onClick={() => handleSizeChange("medium")}
+                selected={size === "średnia"}
+                onClick={() => handleSizeChange("średnia")}
               >
                 Medium ${formatPrice(currentPizza.price_medium)}
               </SizeButton>
               <SizeButton
-                selected={size === "large"}
-                onClick={() => handleSizeChange("large")}
+                selected={size === "duża"}
+                onClick={() => handleSizeChange("duża")}
               >
                 Large ${formatPrice(currentPizza.price_large)}
               </SizeButton>
@@ -220,9 +220,9 @@ const PizzaDetailPage = () => {
                   (t) => t.id === topping.id
                 );
                 const toppingPrice =
-                  size === "small"
+                  size === "mała"
                     ? topping.price_small
-                    : size === "medium"
+                    : size === "średnia"
                     ? topping.price_medium
                     : topping.price_large;
 

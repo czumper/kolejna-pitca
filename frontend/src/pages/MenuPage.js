@@ -12,6 +12,7 @@ const MenuPage = () => {
   // Filtering state
   const [activeCategory, setActiveCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [priceRange, setPriceRange] = useState({ min: "", max: "" });
   const [filters, setFilters] = useState({
     vegetarian: false,
     spicy: false,
@@ -23,33 +24,31 @@ const MenuPage = () => {
   });
   const [showFilters, setShowFilters] = useState(false);
 
-  // On component mount, fetch categories and all pizzas
-  useEffect(() => {
-    dispatch(fetchCategories());
-    dispatch(fetchPizzas());
-  }, [dispatch]);
-
-  // When filter criteria changes, fetch filtered pizzas
+  
   useEffect(() => {
     const params = {};
   
+    // Dodaj kategorię, jeśli nie jest "all"
     if (activeCategory !== "all") {
       params.category = activeCategory;
     }
   
+    // Dodaj zapytanie wyszukiwania
     if (searchQuery) {
       params.search = searchQuery;
     }
   
+    // Dodaj filtr wegetariański
     if (filters.vegetarian) {
       params.is_vegetarian = true;
     }
   
+    // Dodaj filtr ostrości
     if (filters.spicy) {
       params.is_spicy = true;
     }
   
-   
+    // Dodaj wybrane rozmiary pizzy
     const selectedSizes = [];
     if (filters.size.small) selectedSizes.push("small");
     if (filters.size.medium) selectedSizes.push("medium");
@@ -57,16 +56,32 @@ const MenuPage = () => {
   
     if (selectedSizes.length > 0) {
       params.size = selectedSizes.join(",");
-    } 
+    }
   
+    // Dodaj zakres cen na podstawie wybranego rozmiaru
+    if (priceRange.min || priceRange.max) {
+      const selectedSize = getSelectedSize(); // Pobierz wybrany rozmiar
+      if (selectedSize === "small") {
+        if (priceRange.min) params.price_small_min = priceRange.min;
+        if (priceRange.max) params.price_small_max = priceRange.max;
+      } else if (selectedSize === "medium") {
+        if (priceRange.min) params.price_medium_min = priceRange.min;
+        if (priceRange.max) params.price_medium_max = priceRange.max;
+      } else if (selectedSize === "large") {
+        if (priceRange.min) params.price_large_min = priceRange.min;
+        if (priceRange.max) params.price_large_max = priceRange.max;
+      }
+    }
+  
+    // Wywołaj akcję fetchPizzas z parametrami
     dispatch(fetchPizzas(params));
-  }, [dispatch, activeCategory, searchQuery, filters]);
+  }, [dispatch, activeCategory, searchQuery, filters, priceRange]);
 
   const getSelectedSize = () => {
     if (filters.size.small) return "small";
     if (filters.size.medium) return "medium";
     if (filters.size.large) return "large";
-    return "medium"; 
+    return "medium";      
   };
 
   const handleCategoryChange = (categoryId) => {
@@ -77,11 +92,20 @@ const MenuPage = () => {
     setSearchQuery(e.target.value);
   };
 
+const handlePriceChange = (e) => {
+  const { name, value } = e.target;
+  setPriceRange((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+};
+
  
 
   const handleClearFilters = () => {
     setActiveCategory("all");
     setSearchQuery("");
+    setPriceRange({min:"", max:""});
     setFilters({
       vegetarian: false,
       spicy: false,
@@ -194,6 +218,28 @@ const MenuPage = () => {
     onChange={() => handleFilterChange("size", "large")}
   />
   <FilterLabel htmlFor="large">Duża</FilterLabel>
+</FilterOption>
+
+<FilterOption>
+  <FilterLabel>Cena od:</FilterLabel>
+  <input
+    type="text"
+    name="min"
+    value={priceRange.min}
+    onChange={handlePriceChange}
+    placeholder="Min"
+  />
+</FilterOption>
+
+<FilterOption>
+  <FilterLabel>Cena do:</FilterLabel>
+  <input 
+    type="text"
+    name="max"
+    value={priceRange.max}
+    onChange={handlePriceChange}
+    placeholder="Max"
+  />
 </FilterOption>
 
 
@@ -346,6 +392,19 @@ const CheckboxInput = styled.input`
 
 const FilterLabel = styled.label`
   cursor: pointer;
+`;
+
+const PriceInput = styled.input`
+  width: 80px;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0,9rem;
+
+  &:focus {
+    outline: none;
+    border-color: #d32f2f;
+  }
 `;
 
 const ClearFiltersButton = styled.button`
