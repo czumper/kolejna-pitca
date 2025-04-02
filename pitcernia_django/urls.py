@@ -26,7 +26,7 @@ urlpatterns = [
     path('api/auth/', include('djoser.urls')),
     path('api/auth/', include('djoser.urls.jwt')),
     path('api/auth/register/', RegisterView.as_view(), name='register'),
-    path('api/auth/activation/<str:uidb64>/<str:token>/', ActivateAccountView.as_view(), name='account-activation'),
+    path('api/auth/activatie/<str:uidb64>/<str:token>/', ActivateAccountView.as_view(), name='account-activatie'),
     path('api/orders/track/', OrderTrackingView.as_view(), name='order-tracking'),
     path('', TemplateView.as_view(template_name='index.html')),
     re_path(r'^(?!api/).*$', TemplateView.as_view(template_name='index.html'), name='index'),
