@@ -42,7 +42,9 @@ const HomePage = () => {
       <FeatureSection>
         <FeatureCard>
           <h3>Świeże składniki</h3>
-          <p>Używamy tylko wysokiej jakości i świeże składniki do naszej pizzy</p>
+          <p>
+            Używamy tylko wysokiej jakości i świeże składniki do naszej pizzy
+          </p>
         </FeatureCard>
 
         <FeatureCard>
@@ -66,7 +68,7 @@ const HomeContainer = styled.div`
 
 const HeroSection = styled.section`
   background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-    url("/images/ppp.jpg");
+    url("/static/images/ppp.jpg");
   background-size: cover;
   background-position: center;
   height: 500px;
@@ -176,7 +178,6 @@ const FeatureSection = styled.section`
   max-width: 1200px;
   margin: 0 auto 3rem;
 `;
-
 
 const FeatureCard = styled.div`
   background-color: white;
