@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
@@ -6,6 +6,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { register, resetRegistrationSuccess } from "../features/auth/authSlice";
 import apiService from "../services/api";
+import debounce from "lodash/debounce";
 
 // Walidacja hasła i reszty pól
 const RegisterSchema = Yup.object().shape({
@@ -49,35 +50,33 @@ const RegisterPage = () => {
     };
   }, [dispatch]);
 
-  // Funkcja do sprawdzania dostępności nazwy użytkownika
-  const checkUsernameAvailability = async (username) => {
-    if (!username) {
-      console.log("Username is empty, resetting status");
-      setUsernameStatus(null);
-      setUsernameMessage("");
-      return;
-    }
-
-    try {
-      console.log("Checking username:", username);
-      const response = await apiService.checkUsername({ username });
-      console.log("Raw API response:", response);
-      console.log("Response data:", response.data);
-      const isAvailable = response.data.available;
-      console.log("Is username available?", isAvailable);
-      if (isAvailable) {
-        setUsernameStatus("available");
-        setUsernameMessage("Nazwa użytkownika jest dostępna!");
-      } else {
-        setUsernameStatus("taken");
-        setUsernameMessage("Nazwa użytkownika jest już zajęta!");
+  // Funkcja do sprawdzania dostępności nazwy użytkownika z debounce
+  const checkUsernameAvailability = useCallback(
+    debounce(async (username) => {
+      if (!username) {
+        console.log("Username is empty, resetting status");
+        setUsernameStatus(null);
+        setUsernameMessage("");
+        return;
       }
-    } catch (err) {
-      console.error("Error checking username:", err);
-      setUsernameStatus("error");
-      setUsernameMessage("Błąd podczas sprawdzania nazwy użytkownika.");
-    }
-  };
+
+      try {
+        const response = await apiService.checkUsername({ username });
+        const isAvailable = response.data.available;
+        if (isAvailable) {
+          setUsernameStatus("available");
+          setUsernameMessage("Nazwa użytkownika jest dostępna!");
+        } else {
+          setUsernameStatus("taken");
+          setUsernameMessage("Nazwa użytkownika jest już zajęta!");
+        }
+      } catch (err) {
+        setUsernameStatus("error");
+        setUsernameMessage("Błąd podczas sprawdzania nazwy użytkownika.");
+      }
+    }, 500), // 500ms opóźnienia
+    []
+  );
 
   const handleSubmit = (values) => {
     dispatch(register(values));
@@ -105,7 +104,7 @@ const RegisterPage = () => {
   return (
     <PageContainer>
       <RegisterContainer>
-        <RegisterHeader>Stwórz konto, mordeczko!</RegisterHeader>
+        <RegisterHeader>Stwórz konto!</RegisterHeader>
 
         {error && typeof error === "string" && <ErrorAlert>{error}</ErrorAlert>}
 
@@ -157,17 +156,12 @@ const RegisterPage = () => {
                   placeholder="Nazwa użytkownika"
                   onChange={(e) => {
                     const username = e.target.value;
-                    console.log("Username changed to:", username);
                     values.username = username; // Aktualizuj wartość w Formik
                     setFieldTouched("username", true);
-                    checkUsernameAvailability(username); // Sprawdzaj w czasie rzeczywistym
+                    checkUsernameAvailability(username); // Sprawdzaj z debounce
                   }}
                 />
                 <StatusContainer>
-                  {console.log(
-                    "Rendering with usernameStatus:",
-                    usernameStatus
-                  )}
                   {usernameStatus === "available" && (
                     <StatusMessage success>{usernameMessage}</StatusMessage>
                   )}
