@@ -6,7 +6,7 @@
 /frontend/coverage
 /env
 /venv
-/frontend/src/services/api.js
+#/frontend/src/services/api.js
 /venv
 /env
 /staticfiles
