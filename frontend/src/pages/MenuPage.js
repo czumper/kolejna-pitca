@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
-import { fetchCategories, fetchPizzas } from "../features/menu/menuSlice";
+import { fetchPizzas } from "../features/menu/menuSlice";
 import PizzaCard from "../components/menu/PizzaCard";
 import { FaSearch, FaFilter, FaTimes } from "react-icons/fa";
 
 const MenuPage = () => {
   const dispatch = useDispatch();
-  const { categories, pizzas, loading } = useSelector((state) => state.menu);
+  const { pizzas, loading } = useSelector((state) => state.menu);
 
   // Filtering state
-  const [activeCategory, setActiveCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [priceRange, setPriceRange] = useState({ min: "", max: "" });
   const [filters, setFilters] = useState({
@@ -18,49 +17,41 @@ const MenuPage = () => {
     spicy: false,
     size: {
       small: false,
-      medium: false,
+      medium: true, // Domyślnie średni rozmiar
       large: false,
-    }
+    },
   });
   const [showFilters, setShowFilters] = useState(false);
 
-  
   useEffect(() => {
     const params = {};
-  
-    // Dodaj kategorię, jeśli nie jest "all"
-    if (activeCategory !== "all") {
-      params.category = activeCategory;
-    }
-  
+
     // Dodaj zapytanie wyszukiwania
     if (searchQuery) {
       params.search = searchQuery;
     }
-  
+
     // Dodaj filtr wegetariański
     if (filters.vegetarian) {
       params.is_vegetarian = true;
     }
-  
+
     // Dodaj filtr ostrości
     if (filters.spicy) {
       params.is_spicy = true;
     }
-  
-    // Dodaj wybrane rozmiary pizzy
+
+    // Dodaj wybrany rozmiar pizzy
     const selectedSizes = [];
     if (filters.size.small) selectedSizes.push("small");
     if (filters.size.medium) selectedSizes.push("medium");
     if (filters.size.large) selectedSizes.push("large");
-  
-    if (selectedSizes.length > 0) {
-      params.size = selectedSizes.join(",");
-    }
-  
+
+    const selectedSize = getSelectedSize();
+    params.size = selectedSize;
+
     // Dodaj zakres cen na podstawie wybranego rozmiaru
     if (priceRange.min || priceRange.max) {
-      const selectedSize = getSelectedSize(); // Pobierz wybrany rozmiar
       if (selectedSize === "small") {
         if (priceRange.min) params.price_small_min = priceRange.min;
         if (priceRange.max) params.price_small_max = priceRange.max;
@@ -72,59 +63,56 @@ const MenuPage = () => {
         if (priceRange.max) params.price_large_max = priceRange.max;
       }
     }
-  
+
     // Wywołaj akcję fetchPizzas z parametrami
     dispatch(fetchPizzas(params));
-  }, [dispatch, activeCategory, searchQuery, filters, priceRange]);
+  }, [dispatch, searchQuery, filters, priceRange]);
 
   const getSelectedSize = () => {
     if (filters.size.small) return "small";
     if (filters.size.medium) return "medium";
     if (filters.size.large) return "large";
-    return "medium";      
-  };
-
-  const handleCategoryChange = (categoryId) => {
-    setActiveCategory(categoryId);
+    return "medium"; // Domyślnie średni
   };
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
 
-const handlePriceChange = (e) => {
-  const { name, value } = e.target;
-  setPriceRange((prev) => ({
-    ...prev,
-    [name]: value,
-  }));
-};
-
- 
+  const handlePriceChange = (e) => {
+    const { name, value } = e.target;
+    // Zezwól tylko na liczby
+    if (value === "" || /^\d+$/.test(value)) {
+      setPriceRange((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  };
 
   const handleClearFilters = () => {
-    setActiveCategory("all");
     setSearchQuery("");
-    setPriceRange({min:"", max:""});
+    setPriceRange({ min: "", max: "" });
     setFilters({
       vegetarian: false,
       spicy: false,
-      size: { 
+      size: {
         small: false,
-        medium: false,
+        medium: true, // Domyślnie średni
         large: false,
       },
-
     });
   };
 
   const handleFilterChange = (filter, value) => {
     if (filter === "size") {
+      // Upewnij się, że tylko jeden rozmiar jest wybrany
       setFilters({
         ...filters,
         size: {
-          ...filters.size,
-          [value]: !filters.size[value],
+          small: value === "small" ? !filters.size.small : false,
+          medium: value === "medium" ? !filters.size.medium : false,
+          large: value === "large" ? !filters.size.large : false,
         },
       });
     } else {
@@ -137,18 +125,17 @@ const handlePriceChange = (e) => {
 
   // Check if any filters are active
   const isFiltering =
-    activeCategory !== "all" ||
     searchQuery !== "" ||
     filters.vegetarian ||
-    filters.spicy;
+    filters.spicy ||
+    priceRange.min !== "" ||
+    priceRange.max !== "";
 
   return (
     <PageContainer>
       <MenuHeader>
         <h1>Menu</h1>
-        <MenuSubtitle>
-          Dobre pizze jedz!
-        </MenuSubtitle>
+        <MenuSubtitle>Dobre pizze jedz!</MenuSubtitle>
       </MenuHeader>
 
       <SearchFilterContainer>
@@ -191,57 +178,56 @@ const handlePriceChange = (e) => {
         </FilterOption>
 
         <FilterOption>
-  <CheckboxInput
-    type="checkbox"
-    id="small"
-    checked={filters.size.small}
-    onChange={() => handleFilterChange("size", "small")}
-  />
-  <FilterLabel htmlFor="small">Mała</FilterLabel>
-</FilterOption>
+          <CheckboxInput
+            type="checkbox"
+            id="small"
+            checked={filters.size.small}
+            onChange={() => handleFilterChange("size", "small")}
+          />
+          <FilterLabel htmlFor="small">Mała</FilterLabel>
+        </FilterOption>
 
-<FilterOption>
-  <CheckboxInput
-    type="checkbox"
-    id="medium"
-    checked={filters.size.medium}
-    onChange={() => handleFilterChange("size", "medium")}
-  />
-  <FilterLabel htmlFor="medium">Średnia</FilterLabel>
-</FilterOption>
+        <FilterOption>
+          <CheckboxInput
+            type="checkbox"
+            id="medium"
+            checked={filters.size.medium}
+            onChange={() => handleFilterChange("size", "medium")}
+          />
+          <FilterLabel htmlFor="medium">Średnia</FilterLabel>
+        </FilterOption>
 
-<FilterOption>
-  <CheckboxInput
-    type="checkbox"
-    id="large"
-    checked={filters.size.large}
-    onChange={() => handleFilterChange("size", "large")}
-  />
-  <FilterLabel htmlFor="large">Duża</FilterLabel>
-</FilterOption>
+        <FilterOption>
+          <CheckboxInput
+            type="checkbox"
+            id="large"
+            checked={filters.size.large}
+            onChange={() => handleFilterChange("size", "large")}
+          />
+          <FilterLabel htmlFor="large">Duża</FilterLabel>
+        </FilterOption>
 
-<FilterOption>
-  <FilterLabel>Cena od:</FilterLabel>
-  <input
-    type="text"
-    name="min"
-    value={priceRange.min}
-    onChange={handlePriceChange}
-    placeholder="Min"
-  />
-</FilterOption>
+        <FilterOption>
+          <FilterLabel>Cena od:</FilterLabel>
+          <PriceInput
+            type="text"
+            name="min"
+            value={priceRange.min}
+            onChange={handlePriceChange}
+            placeholder="Min"
+          />
+        </FilterOption>
 
-<FilterOption>
-  <FilterLabel>Cena do:</FilterLabel>
-  <input 
-    type="text"
-    name="max"
-    value={priceRange.max}
-    onChange={handlePriceChange}
-    placeholder="Max"
-  />
-</FilterOption>
-
+        <FilterOption>
+          <FilterLabel>Cena do:</FilterLabel>
+          <PriceInput
+            type="text"
+            name="max"
+            value={priceRange.max}
+            onChange={handlePriceChange}
+            placeholder="Max"
+          />
+        </FilterOption>
 
         {isFiltering && (
           <ClearFiltersButton onClick={handleClearFilters}>
@@ -249,29 +235,6 @@ const handlePriceChange = (e) => {
           </ClearFiltersButton>
         )}
       </FiltersContainer>
-
-      <CategoriesContainer>
-        <CategoryButton
-          active={activeCategory === "all"}
-          onClick={() => handleCategoryChange("all")}
-        >
-          All
-        </CategoryButton>
-
-        {Array.isArray(categories) ? (
-          categories.map((category) => (
-            <CategoryButton
-              key={category.id}
-              active={activeCategory === category.id}
-              onClick={() => handleCategoryChange(category.id)}
-            >
-              {category.name}
-            </CategoryButton>
-          ))
-        ) : (
-          <ErrorMessage>Dane kategorii są nieprawidłowe</ErrorMessage>
-        )}
-      </CategoriesContainer>
 
       {loading ? (
         <LoadingMessage>Ładowanie pizz...</LoadingMessage>
@@ -283,7 +246,11 @@ const handlePriceChange = (e) => {
       ) : (
         <PizzasGrid>
           {pizzas.results?.map((pizza) => (
-            <PizzaCard key={pizza.id} pizza={pizza} selectedSize={getSelectedSize()} />
+            <PizzaCard
+              key={pizza.id}
+              pizza={pizza}
+              selectedSize={getSelectedSize()}
+            />
           ))}
         </PizzasGrid>
       )}
@@ -303,19 +270,24 @@ const MenuHeader = styled.div`
   margin-bottom: 2rem;
 
   h1 {
+    font-size: 2.5rem;
+    color: #d32f2f;
+    text-transform: uppercase;
+    font-weight: bold;
     margin-bottom: 0.5rem;
   }
 `;
 
 const MenuSubtitle = styled.p`
   color: #666;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
+  font-style: italic;
 `;
 
 const SearchFilterContainer = styled.div`
   display: flex;
   gap: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -337,42 +309,50 @@ const SearchIcon = styled.div`
 
 const SearchInput = styled.input`
   width: 100%;
-  padding: 0.75rem 1rem 0.75rem 2.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 0.9rem 1rem 0.9rem 3rem;
+  border: 2px solid #ddd;
+  border-radius: 8px;
   font-size: 1rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
 
   &:focus {
     outline: none;
     border-color: #d32f2f;
+    box-shadow: 0 0 5px rgba(211, 47, 47, 0.3);
   }
 `;
 
 const FilterToggle = styled.button`
   background-color: white;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 0.75rem 1rem;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  padding: 0.9rem 1.5rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
   transition: all 0.3s;
 
   &:hover {
     border-color: #d32f2f;
     color: #d32f2f;
+    transform: scale(1.02);
   }
 `;
 
 const FiltersContainer = styled.div`
   display: ${(props) => (props.show ? "flex" : "none")};
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  background-color: #f8f8f8;
-  border-radius: 4px;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background-color: white;
+  border-radius: 15px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
   align-items: center;
+  flex-wrap: wrap;
 
   @media (max-width: 480px) {
     flex-direction: column;
@@ -387,73 +367,83 @@ const FilterOption = styled.div`
 `;
 
 const CheckboxInput = styled.input`
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #ddd;
+  border-radius: 4px;
   cursor: pointer;
+  position: relative;
+  transition: all 0.3s;
+
+  &:checked {
+    background-color: #d32f2f;
+    border-color: #d32f2f;
+  }
+
+  &:checked::after {
+    content: "✔";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 12px;
+  }
+
+  &:hover {
+    border-color: #d32f2f;
+  }
 `;
 
 const FilterLabel = styled.label`
+  font-size: 1rem;
+  color: #333;
+  font-weight: 500;
   cursor: pointer;
+  transition: color 0.3s;
+
+  &:hover {
+    color: #d32f2f;
+  }
 `;
 
 const PriceInput = styled.input`
   width: 80px;
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 0,9rem;
+  padding: 0.6rem;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  font-size: 1rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
 
   &:focus {
     outline: none;
     border-color: #d32f2f;
+    box-shadow: 0 0 5px rgba(211, 47, 47, 0.3);
   }
 `;
 
 const ClearFiltersButton = styled.button`
-  background: none;
+  background-color: #d32f2f;
   border: none;
-  color: #d32f2f;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 5px;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
-  margin-left: auto;
   font-size: 0.9rem;
+  font-weight: 600;
+  transition: background-color 0.3s, transform 0.2s;
+
+  &:hover {
+    background-color: #b71c1c;
+    transform: scale(1.02);
+  }
 
   @media (max-width: 480px) {
     margin-left: 0;
-  }
-`;
-
-const CategoriesContainer = styled.div`
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 2rem;
-  overflow-x: auto;
-  padding-bottom: 0.5rem;
-
-  &::-webkit-scrollbar {
-    height: 4px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background-color: #ccc;
-    border-radius: 4px;
-  }
-`;
-
-const CategoryButton = styled.button`
-  background-color: ${(props) => (props.active ? "#d32f2f" : "white")};
-  color: ${(props) => (props.active ? "white" : "#333")};
-  border: 1px solid ${(props) => (props.active ? "#d32f2f" : "#ddd")};
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.3s;
-  white-space: nowrap;
-
-  &:hover {
-    border-color: #d32f2f;
-    color: ${(props) => (props.active ? "white" : "#d32f2f")};
   }
 `;
 
@@ -468,7 +458,8 @@ const NoResultsMessage = styled.div`
   text-align: center;
   padding: 3rem;
   background-color: #f8f8f8;
-  border-radius: 8px;
+  border-radius: 15px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 
   button {
     background: none;
@@ -478,6 +469,7 @@ const NoResultsMessage = styled.div`
     cursor: pointer;
     margin-top: 0.5rem;
     font-size: inherit;
+    font-weight: 600;
   }
 `;
 
@@ -485,12 +477,6 @@ const PizzasGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 2rem;
-`;
-
-const ErrorMessage = styled.div`
-  text-align: center;
-  padding: 3rem;
-  color: red;
 `;
 
 export default MenuPage;
