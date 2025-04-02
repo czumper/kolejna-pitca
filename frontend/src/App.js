@@ -42,9 +42,12 @@ const App = () => {
 
   return (
     <Router>
-      <div className="app">
+      <div
+        className="app"
+        style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
+      >
         <Header />
-        <main className="content">
+        <main className="content" style={{ flex: 1, minHeight: "80vh" }}>
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/menu" element={<MenuPage />} />
@@ -52,9 +55,13 @@ const App = () => {
             <Route path="/cart" element={<CartPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
-            <Route path="/activation" component={ActivationPage} />
-            <Route path="/activate/:uid/:token" component={ActivationPage} />
-
+            <Route path="/activation" element={<ActivationPage />} />{" "}
+            {/* Poprawiona składnia */}
+            <Route
+              path="/activate/:uid/:token"
+              element={<ActivationPage />}
+            />{" "}
+            {/* Poprawiona składnia */}
             {/* Protected routes */}
             <Route
               path="/checkout"
@@ -88,17 +95,14 @@ const App = () => {
                 </PrivateRoute>
               }
             />
-
             <Route
               path="/order-success/:orderId"
               element={<OrderSuccessPage />}
             />
             <Route path="/track-order" element={<OrderTrackingPage />} />
-
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/faq" element={<FaqPage />} />
-
             {/* 404 - Not Found */}
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
