@@ -58,8 +58,9 @@ const RegisterPage = () => {
     }
 
     try {
-      // Zakładam, że masz endpoint /api/auth/check-username/
+      console.log("Checking username availability:", username);
       const response = await apiService.checkUsername({ username });
+      console.log("API response:", response);
       if (response.available) {
         setUsernameStatus("available");
         setUsernameMessage("Nazwa użytkownika jest dostępna!");
@@ -68,6 +69,7 @@ const RegisterPage = () => {
         setUsernameMessage("Nazwa użytkownika jest już zajęta!");
       }
     } catch (err) {
+      console.error("Error checking username availability:", err);
       setUsernameStatus("error");
       setUsernameMessage("Błąd podczas sprawdzania nazwy użytkownika.");
     }
