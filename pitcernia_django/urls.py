@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
@@ -29,6 +29,7 @@ urlpatterns = [
     path('api/auth/activate/<str:uidb64>/<str:token>/', ActivateAccountView.as_view(), name='account-activate'),
     path('api/orders/track/', OrderTrackingView.as_view(), name='order-tracking'),
     path('', TemplateView.as_view(template_name='index.html')),
+    re_path(r'^(?!api/).*$', TemplateView.as_view(template_name='index.html'), name='index'),
 #    path('', serve, {'document_root': settings.STATICFILES_DIRS[0], 'path': 'index.html'}),
 ]
 
