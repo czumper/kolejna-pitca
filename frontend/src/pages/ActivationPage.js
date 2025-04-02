@@ -108,7 +108,7 @@ const ActivationPage = () => {
         setStatus("error");
         const errorMessage =
           error.response?.data?.detail ||
-          "Coś sięzepsuło. Link może być nieważny lub wygasł.";
+          "Coś się zepsuło. Link może być nieważny lub wygasł.";
         setMessage(errorMessage);
       }
     };
@@ -129,9 +129,7 @@ const ActivationPage = () => {
           break;
         case "already_activated":
           setStatus("error");
-          setMessage(
-            "Konto już było aktywowane, kurwa. Spróbuj się zalogować."
-          );
+          setMessage("Konto już było aktywowane. Spróbuj się zalogować.");
           break;
         case "invalid":
           setStatus("error");
@@ -159,14 +157,14 @@ const ActivationPage = () => {
           <>
             <LoadingSpinner />
             <Title>Aktywacja konta...</Title>
-            <Message>Chwila, mordeczko, zaraz będzie gotowe!</Message>
+            <Message>Chwila, zaraz będzie gotowe!</Message>
           </>
         ) : (
           <>
             <SpinningPizza src={pizzaImage} alt="Obracająca się pizza" />
             <Title>
               {status === "success" && "Konto aktywowane!"}
-              {status === "error" && "Kurwa, coś poszło nie tak!"}
+              {status === "error" && "Kurczę, coś poszło nie tak!"}
             </Title>
             <Message>{message}</Message>
             <StyledLink to={status === "success" ? "/login" : "/"}>
