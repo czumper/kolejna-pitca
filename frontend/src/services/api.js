@@ -13,9 +13,24 @@ const api = axios.create({
 // Add a request interceptor to add auth token to requests
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`;
+    // Pomijaj dodawanie tokena dla endpointów, które nie wymagają autoryzacji
+    const publicEndpoints = [
+      "/auth/register/",
+      "/auth/jwt/create/",
+      "/auth/check-username/",
+      "/auth/users/activation/",
+      "/auth/password/reset/",
+      "/auth/password/reset/confirm/",
+    ];
+    const isPublicEndpoint = publicEndpoints.some((endpoint) =>
+      config.url.includes(endpoint)
+    );
+
+    if (!isPublicEndpoint) {
+      const token = localStorage.getItem("accessToken");
+      if (token) {
+        config.headers["Authorization"] = `Bearer ${token}`;
+      }
     }
     return config;
   },
@@ -81,7 +96,7 @@ const apiService = {
   requestPasswordReset: (email) => api.post("/auth/password/reset/", { email }),
   resetPassword: (resetData) =>
     api.post("/auth/password/reset/confirm/", resetData),
-  checkUsername: (data) => api.post("/auth/check-username/", data), // Dodane!
+  checkUsername: (data) => api.post("/auth/check-username/", data),
 
   // Category endpoints
   getCategories: () => api.get("/menu/categories/"),

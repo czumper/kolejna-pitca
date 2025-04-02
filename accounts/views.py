@@ -15,6 +15,8 @@ from rest_framework import status
 from .models import User
 
 class CheckUsernameView(APIView):
+    permission_classes = [permissions.AllowAny]
+    
     def post(self, request):
         username = request.data.get('username')
         if not username:
