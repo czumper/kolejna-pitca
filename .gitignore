@@ -12,7 +12,7 @@
 /staticfiles
 
 /frontend/coverage
-
+!frontend/build/static
 .env
 
 # misc
