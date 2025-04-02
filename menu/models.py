@@ -37,7 +37,7 @@ class Pizza(models.Model):
     price_small = models.DecimalField(max_digits=6, decimal_places=2)
     price_medium = models.DecimalField(max_digits=6, decimal_places=2)
     price_large = models.DecimalField(max_digits=6, decimal_places=2)
-    image = models.ImageField(upload_to='pizzas/', blank=True, null=True)
+    image = models.URLField(max_length=500, blank=True, null=True)  # Zmienione na URLField
     ingredients = models.ManyToManyField(Ingredient, related_name='pizzas')
     is_vegetarian = models.BooleanField(default=False)
     is_spicy = models.BooleanField(default=False)

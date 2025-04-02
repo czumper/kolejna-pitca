@@ -4,17 +4,17 @@ from .models import Category, Ingredient, Topping, Pizza
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = ['id', 'name', 'description', 'image']
 
 class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
-        fields = '__all__'
+        fields = ['id', 'name', 'is_vegetarian']
 
 class ToppingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Topping
-        fields = '__all__'
+        fields = ['id', 'name', 'price_small', 'price_medium', 'price_large', 'is_vegetarian']
 
 class PizzaSerializer(serializers.ModelSerializer):
     category_name = serializers.ReadOnlyField(source='category.name')
@@ -22,7 +22,11 @@ class PizzaSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Pizza
-        fields = '__all__'
+        fields = [
+            'id', 'name', 'slug', 'description', 'category', 'category_name',
+            'price_small', 'price_medium', 'price_large', 'image',
+            'ingredients', 'is_vegetarian', 'is_spicy', 'is_featured'
+        ]
 
 class PizzaDetailSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
@@ -30,4 +34,8 @@ class PizzaDetailSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Pizza
-        fields = '__all__'
+        fields = [
+            'id', 'name', 'slug', 'description', 'category',
+            'price_small', 'price_medium', 'price_large', 'image',
+            'ingredients', 'is_vegetarian', 'is_spicy', 'is_featured'
+        ]

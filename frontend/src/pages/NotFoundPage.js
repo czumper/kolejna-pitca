@@ -4,7 +4,7 @@ import pizzaImage from "../assets/Pitcanf.png"; // Ścieżka do obrazka pizzy �
 const NotFoundPage = () => {
   return (
     <div style={styles.container}>
-      <h1 style={styles.title}>404 - Strona nie znaleziona, kurwa!</h1>
+      <h1 style={styles.title}>404 - Strona nie znaleziona.</h1>
       <img src={pizzaImage} alt="Obracająca się pizza" style={styles.pizza} />
       <p style={styles.text}>
         Wygląda na to, że zabłądziłeś, mordeczko. Wróć na główną albo zamawiaj
