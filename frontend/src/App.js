@@ -52,7 +52,8 @@ const App = () => {
             <Route path="/cart" element={<CartPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
-            <Route path="/activate/:uid/:token" element={<ActivationPage />} />
+            <Route path="/activation" component={ActivationPage} />
+            <Route path="/activate/:uid/:token" component={ActivationPage} />
 
             {/* Protected routes */}
             <Route

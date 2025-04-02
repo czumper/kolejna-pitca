@@ -7,6 +7,7 @@ from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.tokens import default_token_generator
 from rest_framework.views import APIView
 from django.utils.encoding import force_str
+from django.http import HttpResponseRedirect
 
 
 class ActivateAccountView(APIView):
@@ -17,15 +18,16 @@ class ActivateAccountView(APIView):
             uid = force_str(urlsafe_base64_decode(uidb64))
             user = User.objects.get(pk=uid)
         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-            return Response({"detail": "Nieprawidłowy link aktywacyjny."}, status=status.HTTP_400_BAD_REQUEST)
+            # Przekieruj na frontend z błędem
+            return HttpResponseRedirect('https://pitcernia.ninja/activation?status=error')
 
         if default_token_generator.check_token(user, token):
             if user.is_active:
-                return Response({"detail": "Konto już aktywowane."}, status=status.HTTP_400_BAD_REQUEST)
+                return HttpResponseRedirect('https://pitcernia.ninja/activation?status=already_activated')
             user.is_active = True
             user.save()
-            return Response({"detail": "Konto aktywowane pomyślnie."}, status=status.HTTP_200_OK)
-        return Response({"detail": "Link aktywacyjny nieprawidłowy lub wygasł."}, status=status.HTTP_400_BAD_REQUEST)     
+            return HttpResponseRedirect('https://pitcernia.ninja/activation?status=success')
+        return HttpResponseRedirect('https://pitcernia.ninja/activation?status=invalid')     
 
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
