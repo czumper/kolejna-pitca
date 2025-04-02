@@ -11,7 +11,7 @@ const PrivateRoute = ({ children }) => {
       <div
         style={{ display: "flex", justifyContent: "center", padding: "3rem" }}
       >
-        Loading...
+        Ładowanie...
       </div>
     );
   }

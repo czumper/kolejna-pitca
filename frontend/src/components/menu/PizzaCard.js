@@ -25,7 +25,7 @@ const PizzaCard = ({ pizza, selectedSize = "medium" }) => {
       default:
         return price_medium;
     }
-  }
+  };
 
   return (
     <Card to={`/pizza/${slug}`}>

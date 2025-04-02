@@ -149,12 +149,12 @@ const PizzaDetailPage = () => {
             {currentPizza.name}
             <PizzaBadges>
               {currentPizza.is_vegetarian && (
-                <VegBadge title="Vegetarian">
+                <VegBadge title="Wege">
                   <FaLeaf />
                 </VegBadge>
               )}
               {currentPizza.is_spicy && (
-                <SpicyBadge title="Spicy">
+                <SpicyBadge title="Ostra">
                   <FaFire />
                 </SpicyBadge>
               )}
@@ -171,7 +171,7 @@ const PizzaDetailPage = () => {
               <Ingredient key={ingredient.id}>
                 {ingredient.name}
                 {ingredient.is_vegetarian && (
-                  <VegBadge small title="Vegetarian">
+                  <VegBadge small title="Wege">
                     <FaLeaf />
                   </VegBadge>
                 )}
@@ -202,7 +202,7 @@ const PizzaDetailPage = () => {
               </SizeButton>
             </SizeOptions>
 
-            <QuantityTitle>Quantity:</QuantityTitle>
+            <QuantityTitle>Ilość:</QuantityTitle>
             <QuantityControl>
               <QuantityButton onClick={() => handleQuantityChange(-1)}>
                 <FaMinus />

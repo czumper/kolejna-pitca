@@ -65,7 +65,7 @@ const CheckoutForm = ({ onOrderPlaced }) => {
             setSelectedAddressId(defaultAddress.id);
           }
         } catch (error) {
-          console.error("Failed to fetch addresses:", error);
+          console.error("Nieudało się sfeczować adresów:", error);
         }
       };
       fetchAddresses();

@@ -116,8 +116,8 @@ const AddToCartForm = ({ pizza }) => {
                   id="size-small"
                 />
                 <SizeLabel htmlFor="size-small">
-                  <SizeName>Small</SizeName>
-                  <SizePrice>${pizza.price_small.toFixed(2)}</SizePrice>
+                  <SizeName>Mała</SizeName>
+                  <SizePrice>ZŁ{pizza.price_small.toFixed(2)}</SizePrice>
                 </SizeLabel>
               </SizeOption>
 
@@ -129,8 +129,8 @@ const AddToCartForm = ({ pizza }) => {
                   id="size-medium"
                 />
                 <SizeLabel htmlFor="size-medium">
-                  <SizeName>Medium</SizeName>
-                  <SizePrice>${pizza.price_medium.toFixed(2)}</SizePrice>
+                  <SizeName>Średnia</SizeName>
+                  <SizePrice>ZŁ{pizza.price_medium.toFixed(2)}</SizePrice>
                 </SizeLabel>
               </SizeOption>
 
@@ -142,8 +142,8 @@ const AddToCartForm = ({ pizza }) => {
                   id="size-large"
                 />
                 <SizeLabel htmlFor="size-large">
-                  <SizeName>Large</SizeName>
-                  <SizePrice>${pizza.price_large.toFixed(2)}</SizePrice>
+                  <SizeName>Duża</SizeName>
+                  <SizePrice>ZŁ{pizza.price_large.toFixed(2)}</SizePrice>
                 </SizeLabel>
               </SizeOption>
             </SizeOptions>
@@ -166,7 +166,7 @@ const AddToCartForm = ({ pizza }) => {
                   <ToppingLabel htmlFor={`topping-${topping.id}`}>
                     <ToppingName>{topping.name}</ToppingName>
                     <ToppingPrice>
-                      +${topping[`price_${values.size}`].toFixed(2)}
+                      +ZŁ{topping[`price_${values.size}`].toFixed(2)}
                     </ToppingPrice>
                   </ToppingLabel>
                 </ToppingOption>
@@ -198,7 +198,7 @@ const AddToCartForm = ({ pizza }) => {
           </FormSection>
 
           <TotalPrice>
-            Total: ${calculatePrice(values.size, selectedToppings).toFixed(2)}
+            Total: ZŁ{calculatePrice(values.size, selectedToppings).toFixed(2)}
           </TotalPrice>
 
           <AddToCartButton type="submit">Dodaj do koszyka</AddToCartButton>
