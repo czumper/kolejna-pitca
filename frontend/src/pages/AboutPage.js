@@ -85,7 +85,7 @@ const AboutPage = () => {
           <TeamMember>
             <TeamMemberImage
               src="https://media.discordapp.net/attachments/1357018093091684452/1357018541076910151/8df70a8000149448d014de4be6f4e817.JPEG?ex=67eead80&is=67ed5c00&hm=c89fb82237ac9a23c34a065655bea7f78d9f1d2561d2a81fef9831a84b33b140&=&format=webp&width=408&height=544"
-              alt="Team Member"
+              alt="Franek"
             />
             <h3>Franek</h3>
             <p>założyciel</p>
@@ -112,10 +112,10 @@ const AboutPage = () => {
           <TeamMember>
             <TeamMemberImage
               src="https://media.discordapp.net/attachments/1357018093091684452/1357018541454262322/a6ea7cf8a2011e1dc984bc5607817164.JPEG?ex=67eead80&is=67ed5c00&hm=e69694a4f9712406a44fbc537251345f4c669ddcca011306f89e3c08bd43e242&=&format=webp&width=408&height=544"
-              alt="Team Member"
+              alt="Kevin"
             />
             <h3>Kevin</h3>
-            <p>~Lepiej dostać wędkę niż rybkę</p>
+            <p>~Z głodu sie jeszcze nikt nie zesroł</p>
           </TeamMember>
         </TeamGrid>
       </TeamSection>

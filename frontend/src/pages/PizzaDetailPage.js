@@ -186,19 +186,19 @@ const PizzaDetailPage = () => {
                 selected={size === "mała"}
                 onClick={() => handleSizeChange("mała")}
               >
-                Small ${formatPrice(currentPizza.price_small)}
+                Mała ZŁ{formatPrice(currentPizza.price_small)}
               </SizeButton>
               <SizeButton
                 selected={size === "średnia"}
                 onClick={() => handleSizeChange("średnia")}
               >
-                Medium ${formatPrice(currentPizza.price_medium)}
+                Średnia ZŁ{formatPrice(currentPizza.price_medium)}
               </SizeButton>
               <SizeButton
                 selected={size === "duża"}
                 onClick={() => handleSizeChange("duża")}
               >
-                Large ${formatPrice(currentPizza.price_large)}
+                Duża ZŁ{formatPrice(currentPizza.price_large)}
               </SizeButton>
             </SizeOptions>
 
@@ -240,7 +240,7 @@ const PizzaDetailPage = () => {
                         </VegBadge>
                       )}
                     </ToppingName>
-                    <ToppingPrice>+${formatPrice(toppingPrice)}</ToppingPrice>
+                    <ToppingPrice>+ZŁ{formatPrice(toppingPrice)}</ToppingPrice>
                   </ToppingItem>
                 );
               })}

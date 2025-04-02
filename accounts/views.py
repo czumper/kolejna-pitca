@@ -9,6 +9,20 @@ from rest_framework.views import APIView
 from django.utils.encoding import force_str
 from django.http import HttpResponseRedirect
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import User
+
+class CheckUsernameView(APIView):
+    def post(self, request):
+        username = request.data.get('username')
+        if not username:
+            return Response({'error': 'Username is required'}, status=status.HTTP_400_BAD_REQUEST)
+        if User.objects.filter(username=username).exists():
+            return Response({'available': False}, status=status.HTTP_200_OK)
+        return Response({'available': True}, status=status.HTTP_200_OK)
+    
 
 class ActivateAccountView(APIView):
     permission_classes = [permissions.AllowAny]

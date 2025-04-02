@@ -81,6 +81,7 @@ const apiService = {
   requestPasswordReset: (email) => api.post("/auth/password/reset/", { email }),
   resetPassword: (resetData) =>
     api.post("/auth/password/reset/confirm/", resetData),
+  checkUsername: (data) => api.post("/auth/check-username/", data), // Dodane!
 
   // Category endpoints
   getCategories: () => api.get("/menu/categories/"),
