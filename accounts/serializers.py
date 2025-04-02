@@ -42,7 +42,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         
         # Przygotuj link aktywacyjny
-        activation_link = f"https://pitcernia.ninja/api/auth/activatie/{uid}/{token}"
+        activation_link = f"https://pitcernia.ninja/api/auth/activate/{uid}/{token}"
         
         # Wyślij email
         subject = "Aktywuj swoje konto w Pitcerni"
