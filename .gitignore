@@ -1,21 +1,18 @@
 .gitignore
 # dependencies
 /frontend/node_modules
-/pitcernia_django/frontend/node_modules
-/pitcernia_django/frontend/coverage
+
 .pnp.js
 /frontend/coverage
 /env
 /venv
-
+/frontend/src/services/api.js
 /venv
 /env
-# testing
-/pitcernia_django/frontend/coverage
+/staticfiles
+
 /frontend/coverage
-# production
-#/pitcernia_django/frontend/build
-#/frontend/build
+
 .env
 
 # misc
