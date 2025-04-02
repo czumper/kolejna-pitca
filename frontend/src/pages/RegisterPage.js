@@ -5,7 +5,7 @@ import styled from "styled-components";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { register, resetRegistrationSuccess } from "../features/auth/authSlice";
-import apiService from "../services/api"; // Zakładam, że masz apiService
+import apiService from "../services/api";
 
 // Walidacja hasła i reszty pól
 const RegisterSchema = Yup.object().shape({
@@ -52,16 +52,20 @@ const RegisterPage = () => {
   // Funkcja do sprawdzania dostępności nazwy użytkownika
   const checkUsernameAvailability = async (username) => {
     if (!username) {
+      console.log("Username is empty, resetting status");
       setUsernameStatus(null);
       setUsernameMessage("");
       return;
     }
 
     try {
-      console.log("Checking username availability:", username);
+      console.log("Checking username:", username);
       const response = await apiService.checkUsername({ username });
-      console.log("API response:", response);
-      if (response.available) {
+      console.log("Raw API response:", response);
+      console.log("Response data:", response.data);
+      const isAvailable = response.data.available;
+      console.log("Is username available?", isAvailable);
+      if (isAvailable) {
         setUsernameStatus("available");
         setUsernameMessage("Nazwa użytkownika jest dostępna!");
       } else {
@@ -69,7 +73,7 @@ const RegisterPage = () => {
         setUsernameMessage("Nazwa użytkownika jest już zajęta!");
       }
     } catch (err) {
-      console.error("Error checking username availability:", err);
+      console.error("Error checking username:", err);
       setUsernameStatus("error");
       setUsernameMessage("Błąd podczas sprawdzania nazwy użytkownika.");
     }
@@ -153,12 +157,17 @@ const RegisterPage = () => {
                   placeholder="Nazwa użytkownika"
                   onChange={(e) => {
                     const username = e.target.value;
+                    console.log("Username changed to:", username);
                     values.username = username; // Aktualizuj wartość w Formik
                     setFieldTouched("username", true);
                     checkUsernameAvailability(username); // Sprawdzaj w czasie rzeczywistym
                   }}
                 />
                 <StatusContainer>
+                  {console.log(
+                    "Rendering with usernameStatus:",
+                    usernameStatus
+                  )}
                   {usernameStatus === "available" && (
                     <StatusMessage success>{usernameMessage}</StatusMessage>
                   )}
