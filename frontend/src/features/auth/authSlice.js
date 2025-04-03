@@ -176,8 +176,43 @@ const authSlice = createSlice({
       })
 
       // Update profile
+      .addCase(updateProfile.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(updateProfile.fulfilled, (state, action) => {
+        state.loading = false;
         state.user = action.payload;
+      })
+      .addCase(updateProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // Change password
+      .addCase(changePassword.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(changePassword.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(changePassword.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // Change email
+      .addCase(changeEmail.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(changeEmail.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(changeEmail.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       })
 
       // Logout

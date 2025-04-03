@@ -1,18 +1,15 @@
 from rest_framework import viewsets, permissions, status, generics
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework.views import APIView
 from .models import User, Address
-from .serializers import UserSerializer, AddressSerializer, UserRegistrationSerializer, PasswordChangeSerializer
+from .serializers import UserSerializer, AddressSerializer, UserRegistrationSerializer, PasswordChangeSerializer, ChangeEmailSerializer
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.tokens import default_token_generator
-from rest_framework.views import APIView
 from django.utils.encoding import force_str
 from django.http import HttpResponseRedirect
-
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from .models import User
+from django.core.mail import send_mail
+from django.conf import settings
 
 class CheckUsernameView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -24,7 +21,6 @@ class CheckUsernameView(APIView):
         if User.objects.filter(username=username).exists():
             return Response({'available': False}, status=status.HTTP_200_OK)
         return Response({'available': True}, status=status.HTTP_200_OK)
-    
 
 class ActivateAccountView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -43,7 +39,7 @@ class ActivateAccountView(APIView):
             user.is_active = True
             user.save()
             return HttpResponseRedirect('https://pitcernia.ninja/activation?status=success')
-        return HttpResponseRedirect('https://pitcernia.ninja/activation?status=invalid')     
+        return HttpResponseRedirect('https://pitcernia.ninja/activation?status=invalid')
 
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
@@ -78,6 +74,27 @@ class UserViewSet(viewsets.ModelViewSet):
             user.save()
             return Response({'status': 'password changed'})
         
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ChangeEmailView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        serializer = ChangeEmailSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            user = request.user
+            new_email = serializer.validated_data['email']
+            # Wysłanie emaila z potwierdzeniem
+            send_mail(
+                'Potwierdź nowy adres email',
+                f'Proszę potwierdzić nowy adres email: {new_email}',
+                settings.DEFAULT_FROM_EMAIL,
+                [new_email],
+                fail_silently=False,
+            )
+            user.email = new_email
+            user.save()
+            return Response({"detail": "Email zmieniony pomyślnie. Sprawdź skrzynkę, aby potwierdzić."}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class RegisterView(generics.CreateAPIView):

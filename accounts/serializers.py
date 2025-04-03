@@ -75,3 +75,14 @@ class PasswordChangeSerializer(serializers.Serializer):
     def validate_new_password(self, value):
         validate_password(value)
         return value
+
+class ChangeEmailSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+    email2 = serializers.EmailField(required=True)
+
+    def validate(self, data):
+        if data['email'] != data['email2']:
+            raise serializers.ValidationError({"email2": "Emaile muszą być takie same"})
+        if User.objects.filter(email=data['email']).exclude(id=self.context['request'].user.id).exists():
+            raise serializers.ValidationError({"email": "Ten email jest już używany"})
+        return data

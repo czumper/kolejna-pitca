@@ -21,6 +21,9 @@ import CheckoutPage from "./pages/CheckoutPage";
 import OrderSuccessPage from "./pages/OrderSuccessPage";
 import OrderTrackingPage from "./pages/OrderTrackingPage";
 import UserProfilePage from "./pages/UserProfilePage";
+import ChangePasswordPage from "./pages/ChangePasswordPage";
+import ChangeEmailPage from "./pages/ChangeEmailPage";
+import EditProfilePage from "./pages/EditProfilePage";
 import UserOrdersPage from "./pages/UserOrdersPage";
 import AddressesPage from "./pages/AddressesPage";
 import AboutPage from "./pages/AboutPage";
@@ -76,6 +79,30 @@ const App = () => {
               element={
                 <PrivateRoute>
                   <UserProfilePage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/account/change-password"
+              element={
+                <PrivateRoute>
+                  <ChangePasswordPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/account/change-email"
+              element={
+                <PrivateRoute>
+                  <ChangeEmailPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/account/edit"
+              element={
+                <PrivateRoute>
+                  <EditProfilePage />
                 </PrivateRoute>
               }
             />

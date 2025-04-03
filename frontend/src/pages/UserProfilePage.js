@@ -23,18 +23,22 @@ const UserProfilePage = () => {
 
   return (
     <ProfileContainer>
-      <h1>Mój profil</h1>
+      <ProfileHeader>Mój profil</ProfileHeader>
 
       <ProfileSection>
         <h2>Informacje</h2>
         <ProfileField>
-          <label>Imie:</label>
+          <Label>Imię:</Label>
           <span>
             {user?.first_name} {user?.last_name}
           </span>
         </ProfileField>
         <ProfileField>
-          <label>Email:</label>
+          <Label>Nazwa użytkownika:</Label>
+          <span>{user?.username}</span>
+        </ProfileField>
+        <ProfileField>
+          <Label>Email:</Label>
           <span>{user?.email}</span>
         </ProfileField>
       </ProfileSection>
@@ -46,18 +50,31 @@ const UserProfilePage = () => {
         <EditButton onClick={() => navigate("/profile/change-password")}>
           Zmień hasło
         </EditButton>
+        <EditButton onClick={() => navigate("/profile/change-email")}>
+          Zmień email
+        </EditButton>
       </ButtonGroup>
     </ProfileContainer>
   );
 };
 
+// Styled Components
 const ProfileContainer = styled.div`
   max-width: 800px;
   margin: 2rem auto;
-  padding: 2rem;
+  padding: 3rem;
   background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+`;
+
+const ProfileHeader = styled.h1`
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+  text-align: center;
+  color: #d32f2f;
+  text-transform: uppercase;
+  font-weight: bold;
 `;
 
 const ProfileSection = styled.div`
@@ -68,46 +85,55 @@ const ProfileSection = styled.div`
   h2 {
     color: #333;
     margin-bottom: 1rem;
+    font-size: 1.5rem;
   }
 `;
 
 const ProfileField = styled.div`
   display: flex;
   margin-bottom: 1rem;
-
-  label {
-    font-weight: bold;
-    width: 120px;
-    color: #555;
-  }
+  align-items: center;
 
   span {
     flex: 1;
+    font-size: 1.1rem;
+    color: #555;
   }
+`;
+
+const Label = styled.label`
+  font-weight: 600;
+  width: 150px;
+  color: #333;
 `;
 
 const ButtonGroup = styled.div`
   display: flex;
   gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
 `;
 
 const EditButton = styled.button`
-  padding: 10px 20px;
-  background-color: #ff5a5f;
+  padding: 0.9rem 1.5rem;
+  background-color: #d32f2f;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 5px;
   cursor: pointer;
-  font-weight: bold;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: background-color 0.3s, transform 0.2s;
 
   &:hover {
-    background-color: #ff3a3f;
+    background-color: #b71c1c;
+    transform: scale(1.02);
   }
 `;
 
 const Loading = styled.div`
   text-align: center;
-  padding: 2rem;
+  padding: 3rem;
   font-size: 1.2rem;
   color: #555;
 `;
