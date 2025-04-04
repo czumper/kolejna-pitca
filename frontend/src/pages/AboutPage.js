@@ -2,6 +2,12 @@ import React from "react";
 import styled from "styled-components";
 import { FaPizzaSlice, FaClock, FaUsers, FaTruck } from "react-icons/fa";
 
+// Importowanie zdjęć z assets
+import franekImage from "../assets/franek.jpeg";
+import tobiaszImage from "../assets/tobiasz.jpeg";
+import lukaszImage from "../assets/lukasz.jpeg";
+import kevinImage from "../assets/kevin.jpeg";
+
 const AboutPage = () => {
   return (
     <AboutContainer>
@@ -83,37 +89,25 @@ const AboutPage = () => {
         <h2>Poznaj naszą drużyne</h2>
         <TeamGrid>
           <TeamMember>
-            <TeamMemberImage
-              src="https://media.discordapp.net/attachments/1357018093091684452/1357018541076910151/8df70a8000149448d014de4be6f4e817.JPEG?ex=67eead80&is=67ed5c00&hm=c89fb82237ac9a23c34a065655bea7f78d9f1d2561d2a81fef9831a84b33b140&=&format=webp&width=408&height=544"
-              alt="Franek"
-            />
+            <TeamMemberImage src={franekImage} alt="Franek" />
             <h3>Franek</h3>
             <p>założyciel</p>
           </TeamMember>
 
           <TeamMember>
-            <TeamMemberImage
-              src="https://media.discordapp.net/attachments/1357018093091684452/1357018541978812558/c11a8f8ec96e5f38ff631741cb7558a9.JPEG?ex=67eead80&is=67ed5c00&hm=d518fd7e158ce4938c6c020b66e8e0a445297d57e3bc6ae98ec8e80b3ea8d6dd&=&format=webp&width=408&height=544"
-              alt="Tobiasz"
-            />
+            <TeamMemberImage src={tobiaszImage} alt="Tobiasz" />
             <h3>Tobiasz</h3>
             <p>~Bla bla bla, ble ble ble</p>
           </TeamMember>
 
           <TeamMember>
-            <TeamMemberImage
-              src="https://media.discordapp.net/attachments/1357018093091684452/1357018540636373142/5e7dc9e2ce895847db270c5b72273e7f.JPEG?ex=67eead80&is=67ed5c00&hm=ae22b8c0b825809ebe7eb5263567a44c91ab9ef631a06bfe80a85620e8bae19d&=&format=webp&width=306&height=544"
-              alt="Lukasz"
-            />
+            <TeamMemberImage src={lukaszImage} alt="Lukasz" />
             <h3>Łukasz</h3>
             <p>~Nie mam prawa jazdy</p>
           </TeamMember>
 
           <TeamMember>
-            <TeamMemberImage
-              src="https://media.discordapp.net/attachments/1357018093091684452/1357018541454262322/a6ea7cf8a2011e1dc984bc5607817164.JPEG?ex=67eead80&is=67ed5c00&hm=e69694a4f9712406a44fbc537251345f4c669ddcca011306f89e3c08bd43e242&=&format=webp&width=408&height=544"
-              alt="Kevin"
-            />
+            <TeamMemberImage src={kevinImage} alt="Kevin" />
             <h3>Kevin</h3>
             <p>~Z głodu sie jeszcze nikt nie zesroł</p>
           </TeamMember>

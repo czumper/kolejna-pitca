@@ -57,8 +57,8 @@ export const checkAuthStatus = createAsyncThunk(
   }
 );
 
-export const updateProfile = createAsyncThunk(
-  "auth/updateProfile",
+export const updateUserProfile = createAsyncThunk( // Zmieniono z updateProfile na updateUserProfile
+  "auth/updateUserProfile",
   async (profileData, { rejectWithValue }) => {
     try {
       const response = await apiService.updateUserProfile(profileData);
@@ -176,15 +176,15 @@ const authSlice = createSlice({
       })
 
       // Update profile
-      .addCase(updateProfile.pending, (state) => {
+      .addCase(updateUserProfile.pending, (state) => { // Zmieniono na updateUserProfile
         state.loading = true;
         state.error = null;
       })
-      .addCase(updateProfile.fulfilled, (state, action) => {
+      .addCase(updateUserProfile.fulfilled, (state, action) => { // Zmieniono na updateUserProfile
         state.loading = false;
         state.user = action.payload;
       })
-      .addCase(updateProfile.rejected, (state, action) => {
+      .addCase(updateUserProfile.rejected, (state, action) => { // Zmieniono na updateUserProfile
         state.loading = false;
         state.error = action.payload;
       })

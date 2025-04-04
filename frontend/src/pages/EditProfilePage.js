@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { updateUserProfile } from "../features/auth/authSlice";
+import { updateUserProfile } from "../features/auth/authSlice"; // Wracamy do updateUserProfile
 
 const EditProfilePage = () => {
   const dispatch = useDispatch();
@@ -18,7 +18,7 @@ const EditProfilePage = () => {
   });
 
   const handleSubmit = (values, { setSubmitting }) => {
-    dispatch(updateUserProfile(values))
+    dispatch(updateUserProfile(values)) // Wracamy do updateUserProfile
       .unwrap()
       .then(() => {
         alert("Profil zaktualizowany pomyślnie!");
