@@ -44,13 +44,13 @@ const UserProfilePage = () => {
       </ProfileSection>
 
       <ButtonGroup>
-        <EditButton onClick={() => navigate("/profile/edit")}>
+        <EditButton onClick={() => navigate("/account/edit")}>
           Edytuj profil
         </EditButton>
-        <EditButton onClick={() => navigate("/profile/change-password")}>
+        <EditButton onClick={() => navigate("/account/change-password")}>
           Zmień hasło
         </EditButton>
-        <EditButton onClick={() => navigate("/profile/change-email")}>
+        <EditButton onClick={() => navigate("/account/change-email")}>
           Zmień email
         </EditButton>
       </ButtonGroup>
