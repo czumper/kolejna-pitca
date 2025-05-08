@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import Category, Pizza, Ingredient, Topping, Order, OrderItem, OrderItemTopping
+from .models import Category, Pizza, Ingredient, Topping
+from orders.models import Order, OrderItem, OrderItemTopping  # Zmiana importu
 from django.db import transaction
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -87,7 +88,6 @@ class OrderCreateItemSerializer(serializers.ModelSerializer):
         if not pizza.available:
             raise serializers.ValidationError(f"Pizza '{pizza.name}' is currently unavailable")
         
-        # Check if all toppings are available if any are specified
         if 'toppings' in attrs:
             unavailable = [t.name for t in attrs['toppings'] if not t.available]
             if unavailable:
@@ -127,49 +127,43 @@ class OrderCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         items_data = validated_data.pop('items')
         
-        # Calculate totals
         subtotal = 0
-        tax_rate = 0.08  # 8% tax rate
-        delivery_fee = 5.00  # Fixed delivery fee
+        tax_rate = 0.08
+        delivery_fee = 5.00
         
-        # Create order
         order = Order.objects.create(
             **validated_data,
-            subtotal=0,  # Temporary, will update
-            tax=0,  # Temporary, will update
-            total_amount=0,  # Temporary, will update
+            subtotal=0,
+            tax=0,
+            total_amount=0,
             delivery_fee=delivery_fee
         )
         
-        # Create order items and toppings
         for item_data in items_data:
             toppings = item_data.pop('toppings', [])
             size = item_data['size']
             pizza = item_data['pizza']
             quantity = item_data['quantity']
             
-            # Get the price based on size
             if size == 'small':
                 item_price = pizza.price_small
             elif size == 'medium':
                 item_price = pizza.price_medium
-            else:  # large
+            else:
                 item_price = pizza.price_large
             
-            # Create order item
             order_item = OrderItem.objects.create(
                 order=order,
                 item_price=item_price,
                 **item_data
             )
             
-            # Add toppings if any
             for topping in toppings:
                 if size == 'small':
                     topping_price = topping.price_small
                 elif size == 'medium':
                     topping_price = topping.price_medium
-                else:  # large
+                else:
                     topping_price = topping.price_large
                 
                 OrderItemTopping.objects.create(
@@ -177,13 +171,10 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                     topping=topping,
                     price=topping_price
                 )
-                
                 subtotal += topping_price * quantity
             
-            # Add base price to subtotal
             subtotal += item_price * quantity
         
-        # Update order totals
         tax = subtotal * tax_rate
         total = subtotal + tax + delivery_fee
         

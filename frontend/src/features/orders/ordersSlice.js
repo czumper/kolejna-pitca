@@ -8,15 +8,14 @@ export const createOrder = createAsyncThunk(
   async (orderData, { dispatch, rejectWithValue }) => {
     try {
       const response = await apiService.createOrder(orderData);
-
-      // Clear the cart after successful order
       dispatch(clearCart());
-
       toast.success("Twoje zamówienie zostało złożone pomyślnie!");
       return response.data;
     } catch (error) {
       const errorMessage =
         error.response?.data?.detail ||
+        error.response?.data?.items?.[0]?.size?.[0] ||
+        error.response?.data?.non_field_errors?.[0] ||
         "Nie udało się złożyć zamówienia. Spróbuj ponownie.";
       toast.error(errorMessage);
       return rejectWithValue(errorMessage);
@@ -29,11 +28,30 @@ export const fetchUserOrders = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await apiService.getUserOrders();
+      console.log("fetchUserOrders response:", response.data);
       return response.data;
     } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.detail || "Nie udało się pobrać zamówień"
-      );
+      const errorMessage =
+        error.response?.data?.detail || "Nie udało się pobrać zamówień";
+      console.log("fetchUserOrders error:", errorMessage);
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+export const fetchOrderDetails = createAsyncThunk(
+  "order/fetchOrderDetails",
+  async (orderId, { rejectWithValue }) => {
+    try {
+      const response = await apiService.getOrderDetails(orderId);
+      console.log("fetchOrderDetails response:", response.data);
+      return response.data;
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.detail ||
+        "Nie udało się pobrać szczegółów zamówienia";
+      console.log("fetchOrderDetails error:", errorMessage);
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -62,7 +80,7 @@ const initialState = {
   error: null,
 };
 
-const orderSlice = createSlice({
+const ordersSlice = createSlice({
   name: "order",
   initialState,
   reducers: {
@@ -75,7 +93,6 @@ const orderSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Create order
       .addCase(createOrder.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -88,8 +105,6 @@ const orderSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
-      // Fetch user orders
       .addCase(fetchUserOrders.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -102,8 +117,19 @@ const orderSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
-      // Track order
+      .addCase(fetchOrderDetails.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchOrderDetails.fulfilled, (state, action) => {
+        state.loading = false;
+        state.currentOrder = action.payload;
+      })
+      .addCase(fetchOrderDetails.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        state.currentOrder = null;
+      })
       .addCase(trackOrder.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -120,5 +146,5 @@ const orderSlice = createSlice({
   },
 });
 
-export const { clearCurrentOrder, clearTrackedOrder } = orderSlice.actions;
-export default orderSlice.reducer;
+export const { clearCurrentOrder, clearTrackedOrder } = ordersSlice.actions;
+export default ordersSlice.reducer;

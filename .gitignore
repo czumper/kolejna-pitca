@@ -10,9 +10,12 @@
 /venv
 /env
 /staticfiles
-
+/templates
+/staticfilesx
+/templatesx
 /frontend/coverage
 !frontend/build/static
+/frontend/public/index.html
 .env
 !frontend/build
 /templates

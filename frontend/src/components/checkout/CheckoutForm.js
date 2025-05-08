@@ -1,26 +1,33 @@
-import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import styled from "styled-components";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
-import apiService from "../../services/api";
+import { createOrder } from "../../features/orders/ordersSlice";
+import {
+  fetchUserAddresses,
+  createAddress,
+} from "../../features/addresses/addressSlice";
+import OrderSummary from "./OrderSummary";
 
 // Validation schema for checkout
 const CheckoutSchema = Yup.object().shape({
   customer_name: Yup.string()
-    .required("Pełne imie i nazwikso jest wymagane")
-    .max(100, "Imie i nazwisko musi mieć mniej niż 100 znaków"),
+    .required("Pełne imię i nazwisko jest wymagane")
+    .max(100, "Imię i nazwisko musi mieć mniej niż 100 znaków"),
   customer_email: Yup.string()
     .email("Nieprawidłowy adres email")
     .required("Email jest wymagany"),
   customer_phone: Yup.string()
     .required("Numer telefonu jest wymagany")
-    .matches(/^\+?[0-9]{10,15}$/, "Nieprawidłowy numer telefonu"),
-  delivery_address: Yup.string()
-    .required("Adres dostawy jest wymagany")
-    .max(500, "Adres jest za długi"),
+    .matches(/^\+?\d{9,15}$/, "Numer telefonu musi mieć od 9 do 15 cyfr"),
+  address_line1: Yup.string(),
+  address_line2: Yup.string(),
+  city: Yup.string(),
+  state: Yup.string(),
+  postal_code: Yup.string(),
   delivery_instructions: Yup.string().max(
     500,
     "Instrukcje dostawy są za długie"
@@ -36,158 +43,225 @@ const CheckoutSchema = Yup.object().shape({
 });
 
 const CheckoutForm = ({ onOrderPlaced }) => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const { items: cartItems } = useSelector((state) => state.cart);
   const { user } = useSelector((state) => state.auth);
-  const [addresses, setAddresses] = useState([]);
-  const [selectedAddressId, setSelectedAddressId] = useState("new");
-  const [loading, setLoading] = useState(false);
-  const [formikBag, setFormikBag] = useState(null);
+  const {
+    addresses,
+    loading: addressesLoading,
+    error: addressesError,
+  } = useSelector((state) => state.addresses);
+  const { loading: orderLoading, error: orderError } = useSelector(
+    (state) => state.orders
+  );
 
-  // Get address string from address object
+  const [selectedAddressId, setSelectedAddressId] = useState("new");
+
+  useEffect(() => {
+    if (user) {
+      dispatch(fetchUserAddresses());
+    }
+  }, [dispatch, user]);
+
+  useEffect(() => {
+    if (addresses && addresses.length > 0) {
+      const defaultAddress = addresses.find((addr) => addr.is_default);
+      if (defaultAddress) {
+        setSelectedAddressId(defaultAddress.id.toString());
+      } else {
+        setSelectedAddressId(addresses[0].id.toString());
+      }
+    }
+  }, [addresses]);
+
   const formatAddressString = (address) => {
     return `${address.address_line1}${
       address.address_line2 ? `, ${address.address_line2}` : ""
     }, ${address.city}, ${address.state} ${address.postal_code}`;
   };
 
-  // Fetch user addresses effect
-  useEffect(() => {
-    if (user) {
-      const fetchAddresses = async () => {
-        try {
-          const response = await apiService.getUserAddresses();
-          setAddresses(response.data);
+  const normalizeSize = (size) => {
+    const sizeMap = {
+      mała: "small",
+      small: "small",
+      średnia: "medium",
+      medium: "medium",
+      duża: "large",
+      large: "large",
+    };
+    return sizeMap[size.toLowerCase()] || "medium";
+  };
 
-          // Set default address if available
-          const defaultAddress = response.data.find((addr) => addr.is_default);
-          if (defaultAddress) {
-            setSelectedAddressId(defaultAddress.id);
-          }
-        } catch (error) {
-          console.error("Nieudało się sfeczować adresów:", error);
-        }
-      };
-      fetchAddresses();
+  const summaryItems = cartItems.map((item) => {
+    const normalizedSize = normalizeSize(item.size);
+    let price;
+    if (normalizedSize === "small") {
+      price = item.pizza.price_small;
+    } else if (normalizedSize === "medium") {
+      price = item.pizza.price_medium;
+    } else {
+      price = item.pizza.price_large;
     }
-  }, [user]);
-
-  // Update delivery address when selected address changes
-  useEffect(() => {
-    if (formikBag && formikBag.setFieldValue) {
-      if (selectedAddressId !== "new" && addresses.length > 0) {
-        const selectedAddress = addresses.find(
-          (addr) => addr.id === parseInt(selectedAddressId)
-        );
-        if (selectedAddress) {
-          formikBag.setFieldValue(
-            "delivery_address",
-            formatAddressString(selectedAddress)
-          );
-        }
-      } else if (selectedAddressId === "new") {
-        formikBag.setFieldValue("delivery_address", "");
+    const toppingsPrice = item.toppings.reduce((total, topping) => {
+      let toppingPrice;
+      if (normalizedSize === "small") {
+        toppingPrice = topping.price_small || 0;
+      } else if (normalizedSize === "medium") {
+        toppingPrice = topping.price_medium || 0;
+      } else {
+        toppingPrice = topping.price_large || 0;
       }
-    }
-  }, [selectedAddressId, addresses, formikBag]);
+      return total + toppingPrice;
+    }, 0);
+
+    return {
+      id: item.pizza.id,
+      name: `${item.pizza.name} (${normalizedSize})`,
+      price: price + toppingsPrice,
+      quantity: item.quantity,
+    };
+  });
 
   const handleSubmit = async (values, { setSubmitting }) => {
-    setLoading(true);
-
-    // If no items in cart, show error
     if (!cartItems.length) {
       toast.error("Twój koszyk jest pusty");
       setSubmitting(false);
-      setLoading(false);
       return;
     }
 
+    if (selectedAddressId === "new") {
+      if (!values.address_line1) {
+        toast.error("Adres (linia 1) jest wymagany");
+        setSubmitting(false);
+        return;
+      }
+      if (!values.city) {
+        toast.error("Miasto jest wymagane");
+        setSubmitting(false);
+        return;
+      }
+      if (!values.state) {
+        toast.error("Województwo jest wymagane");
+        setSubmitting(false);
+        return;
+      }
+      if (!values.postal_code || !/^\d{2}-\d{3}$/.test(values.postal_code)) {
+        toast.error("Kod pocztowy musi być w formacie XX-XXX");
+        setSubmitting(false);
+        return;
+      }
+    }
+
     try {
-      // Format order items from cart
       const orderItems = cartItems.map((item) => ({
         pizza: item.pizza.id,
-        size: item.size,
+        size: normalizeSize(item.size),
         quantity: item.quantity,
-        special_instructions: item.specialInstructions,
+        special_instructions: item.specialInstructions || "",
         toppings: item.toppings.map((topping) => topping.id),
       }));
 
-      // Prepare order data
+      let deliveryAddressString;
+
+      if (selectedAddressId !== "new") {
+        const selectedAddress = addresses.find(
+          (addr) => addr.id === parseInt(selectedAddressId)
+        );
+        if (!selectedAddress) {
+          throw new Error("Wybrany adres nie istnieje");
+        }
+        deliveryAddressString = formatAddressString(selectedAddress);
+      } else {
+        const newAddressData = {
+          address_line1: values.address_line1,
+          address_line2: values.address_line2 || "",
+          city: values.city,
+          state: values.state,
+          postal_code: values.postal_code,
+          is_default: addresses.length === 0,
+        };
+        console.log(
+          "Tworzenie nowego adresu:",
+          JSON.stringify(newAddressData, null, 2)
+        );
+        const response = await dispatch(createAddress(newAddressData)).unwrap();
+        console.log("Adres utworzony:", JSON.stringify(response, null, 2));
+        deliveryAddressString = formatAddressString(response);
+      }
+
       const orderData = {
-        ...values,
+        customer_name: values.customer_name,
+        customer_email: values.customer_email,
+        customer_phone: values.customer_phone,
+        delivery_address: deliveryAddressString,
+        delivery_instructions: values.delivery_instructions || "",
+        payment_method: values.payment_method,
+        order_notes: values.order_notes || "",
         items: orderItems,
       };
 
-      // Place order
-      const response = await apiService.createOrder(orderData);
+      console.log(
+        "Dane zamówienia przed wysłaniem:",
+        JSON.stringify(orderData, null, 2)
+      );
+      const response = await dispatch(createOrder(orderData)).unwrap();
+      console.log("Zamówienie utworzone:", JSON.stringify(response, null, 2));
 
-      // Clear form
-      setSubmitting(false);
-      setLoading(false);
-
-      // Notify success and handle order completion
       if (onOrderPlaced) {
-        onOrderPlaced(response.data);
+        onOrderPlaced(response);
       }
 
-      // Navigate to success page
-      navigate(`/order-success/${response.data.id}`);
+      navigate(`/order-success/${response.id}`);
     } catch (error) {
+      console.error("Błąd przy składaniu zamówienia:", error);
+      toast.error(
+        "Błąd przy składaniu zamówienia: " +
+          (error.message || "Spróbuj ponownie")
+      );
       setSubmitting(false);
-      setLoading(false);
-
-      if (error.response && error.response.data) {
-        // Show specific error message from API if available
-        const errorMsg =
-          error.response.data.detail ||
-          "Bład składania zamówienia. Spróbuj ponownie.";
-        toast.error(errorMsg);
-      } else {
-        toast.error("Błąd sieci. Sprawdź połączenie i spróbuj ponownie");
-      }
     }
   };
 
   return (
-    <Formik
-      initialValues={{
-        customer_name: user
-          ? `${user.first_name} ${user.last_name}`.trim()
-          : "",
-        customer_email: user?.email || "",
-        customer_phone: user?.phone_number || "",
-        delivery_address: "",
-        delivery_instructions: "",
-        payment_method: "cash",
-        order_notes: "",
-        terms_accepted: false,
-      }}
-      validationSchema={CheckoutSchema}
-      onSubmit={handleSubmit}
-    >
-      {(formikProps) => {
-        // Store formik bag for use in effects
-        if (!formikBag) {
-          setFormikBag(formikProps);
-        }
-
-        return (
+    <>
+      <OrderSummary items={summaryItems} />
+      <Formik
+        initialValues={{
+          customer_name: user
+            ? `${user.first_name || ""} ${user.last_name || ""}`.trim() ||
+              "Gość"
+            : "Gość",
+          customer_email: user?.email || "",
+          customer_phone: user?.phone_number || "",
+          address_line1: "",
+          address_line2: "",
+          city: "",
+          state: "",
+          postal_code: "",
+          delivery_instructions: "",
+          payment_method: "cash",
+          order_notes: "",
+          terms_accepted: false,
+        }}
+        validationSchema={CheckoutSchema}
+        onSubmit={handleSubmit}
+      >
+        {({ isSubmitting, setFieldValue }) => (
           <StyledForm>
             <FormSection>
               <SectionTitle>Informacje kontaktowe</SectionTitle>
-
               <FormGroup>
-                <Label htmlFor="customer_name">Imie i nazwisko*</Label>
+                <Label htmlFor="customer_name">Imię i nazwisko*</Label>
                 <StyledField
                   type="text"
                   name="customer_name"
-                  placeholder="Wprowadź imie i nazwisko"
+                  placeholder="Wprowadź imię i nazwisko"
                 />
                 <ErrorContainer>
                   <ErrorMessage name="customer_name" component="div" />
                 </ErrorContainer>
               </FormGroup>
-
               <FormRow>
                 <FormGroup>
                   <Label htmlFor="customer_email">Email*</Label>
@@ -200,13 +274,17 @@ const CheckoutForm = ({ onOrderPlaced }) => {
                     <ErrorMessage name="customer_email" component="div" />
                   </ErrorContainer>
                 </FormGroup>
-
                 <FormGroup>
                   <Label htmlFor="customer_phone">Telefon*</Label>
                   <StyledField
                     type="tel"
                     name="customer_phone"
-                    placeholder="Wprowadź numer telefonu"
+                    placeholder="Np. +48123456789"
+                    onChange={(e) => {
+                      let value = e.target.value.replace(/[^0-9+]/g, "");
+                      if (!value.startsWith("+")) value = "+" + value;
+                      setFieldValue("customer_phone", value);
+                    }}
                   />
                   <ErrorContainer>
                     <ErrorMessage name="customer_phone" component="div" />
@@ -214,11 +292,9 @@ const CheckoutForm = ({ onOrderPlaced }) => {
                 </FormGroup>
               </FormRow>
             </FormSection>
-
             <FormSection>
               <SectionTitle>Informacje dostawy</SectionTitle>
-
-              {user && addresses.length > 0 && (
+              {addresses.length > 0 && (
                 <AddressSelect>
                   <Label>Wybierz adres</Label>
                   <SelectContainer>
@@ -229,31 +305,83 @@ const CheckoutForm = ({ onOrderPlaced }) => {
                       <option value="new">Dodaj nowy adres</option>
                       {addresses.map((addr) => (
                         <option key={addr.id} value={addr.id}>
-                          {`${addr.address_line1} (${
-                            addr.is_default ? "Default" : addr.city
-                          })`}
+                          {`${addr.address_line1}, ${addr.city}, ${
+                            addr.postal_code
+                          } ${addr.is_default ? "(Domyślny)" : ""}`}
                         </option>
                       ))}
                     </Select>
                   </SelectContainer>
                 </AddressSelect>
               )}
-
               {selectedAddressId === "new" && (
-                <FormGroup>
-                  <Label htmlFor="delivery_address">Adres dostawy*</Label>
-                  <StyledField
-                    as="textarea"
-                    name="delivery_address"
-                    placeholder="Wprowadź pełny adres dostawy"
-                    rows="3"
-                  />
-                  <ErrorContainer>
-                    <ErrorMessage name="delivery_address" component="div" />
-                  </ErrorContainer>
-                </FormGroup>
+                <>
+                  <FormGroup>
+                    <Label htmlFor="address_line1">Adres (linia 1)*</Label>
+                    <StyledField
+                      type="text"
+                      name="address_line1"
+                      placeholder="Ulica i numer"
+                    />
+                    <ErrorContainer>
+                      <ErrorMessage name="address_line1" component="div" />
+                    </ErrorContainer>
+                  </FormGroup>
+                  <FormGroup>
+                    <Label htmlFor="address_line2">Adres (linia 2)</Label>
+                    <StyledField
+                      type="text"
+                      name="address_line2"
+                      placeholder="Mieszkanie, budynek (opcjonalne)"
+                    />
+                    <ErrorContainer>
+                      <ErrorMessage name="address_line2" component="div" />
+                    </ErrorContainer>
+                  </FormGroup>
+                  <FormRow>
+                    <FormGroup>
+                      <Label htmlFor="city">Miasto*</Label>
+                      <StyledField
+                        type="text"
+                        name="city"
+                        placeholder="Miasto"
+                      />
+                      <ErrorContainer>
+                        <ErrorMessage name="city" component="div" />
+                      </ErrorContainer>
+                    </FormGroup>
+                    <FormGroup>
+                      <Label htmlFor="state">Województwo*</Label>
+                      <StyledField
+                        type="text"
+                        name="state"
+                        placeholder="Województwo"
+                      />
+                      <ErrorContainer>
+                        <ErrorMessage name="state" component="div" />
+                      </ErrorContainer>
+                    </FormGroup>
+                  </FormRow>
+                  <FormGroup>
+                    <Label htmlFor="postal_code">Kod pocztowy*</Label>
+                    <StyledField
+                      type="text"
+                      name="postal_code"
+                      placeholder="XX-XXX"
+                      onChange={(e) => {
+                        let value = e.target.value.replace(/[^0-9]/g, "");
+                        if (value.length >= 2) {
+                          value = value.slice(0, 2) + "-" + value.slice(2, 5);
+                        }
+                        setFieldValue("postal_code", value);
+                      }}
+                    />
+                    <ErrorContainer>
+                      <ErrorMessage name="postal_code" component="div" />
+                    </ErrorContainer>
+                  </FormGroup>
+                </>
               )}
-
               <FormGroup>
                 <Label htmlFor="delivery_instructions">
                   Instrukcje dojazdu (Opcjonalne)
@@ -261,7 +389,7 @@ const CheckoutForm = ({ onOrderPlaced }) => {
                 <StyledField
                   as="textarea"
                   name="delivery_instructions"
-                  placeholder="Dodaj specjalne instrukcje dojazdu (e.g., kod do klatki, miejsce rozpoznawcze, itd.)"
+                  placeholder="Dodaj specjalne instrukcje dojazdu"
                   rows="2"
                 />
                 <ErrorContainer>
@@ -269,10 +397,8 @@ const CheckoutForm = ({ onOrderPlaced }) => {
                 </ErrorContainer>
               </FormGroup>
             </FormSection>
-
             <FormSection>
               <SectionTitle>Szczegóły płatności</SectionTitle>
-
               <PaymentOptions role="group">
                 <PaymentOption>
                   <PaymentRadio
@@ -288,7 +414,6 @@ const CheckoutForm = ({ onOrderPlaced }) => {
                     </PaymentDescription>
                   </PaymentLabel>
                 </PaymentOption>
-
                 <PaymentOption>
                   <PaymentRadio
                     type="radio"
@@ -307,13 +432,12 @@ const CheckoutForm = ({ onOrderPlaced }) => {
               <ErrorContainer>
                 <ErrorMessage name="payment_method" component="div" />
               </ErrorContainer>
-
               <FormGroup>
                 <Label htmlFor="order_notes">Notatki (Opcjonalne)</Label>
                 <StyledField
                   as="textarea"
                   name="order_notes"
-                  placeholder="Add any notes about your order"
+                  placeholder="Dodaj notatki do zamówienia"
                   rows="2"
                 />
                 <ErrorContainer>
@@ -321,7 +445,6 @@ const CheckoutForm = ({ onOrderPlaced }) => {
                 </ErrorContainer>
               </FormGroup>
             </FormSection>
-
             <TermsContainer>
               <CheckboxField
                 type="checkbox"
@@ -329,28 +452,27 @@ const CheckoutForm = ({ onOrderPlaced }) => {
                 id="terms_accepted"
               />
               <TermsLabel htmlFor="terms_accepted">
-                Akceptuję <TermsLink to="/terms">Warunki & wymagania</TermsLink>{" "}
-                and <TermsLink to="/privacy">Polityka prywatności</TermsLink>
+                Akceptuję <TermsLink to="/terms">Warunki</TermsLink> i{" "}
+                <TermsLink to="/privacy">Politykę prywatności</TermsLink>
               </TermsLabel>
             </TermsContainer>
             <ErrorContainer>
               <ErrorMessage name="terms_accepted" component="div" />
             </ErrorContainer>
-
+            {orderError && <ErrorContainer>{orderError}</ErrorContainer>}
             <PlaceOrderButton
               type="submit"
-              disabled={formikProps.isSubmitting || loading}
+              disabled={isSubmitting || orderLoading}
             >
-              {loading ? "Processing..." : "Place Order"}
+              {orderLoading ? "Przetwarzanie..." : "Złóż zamówienie"}
             </PlaceOrderButton>
           </StyledForm>
-        );
-      }}
-    </Formik>
+        )}
+      </Formik>
+    </>
   );
 };
 
-// Styled Components
 const StyledForm = styled(Form)`
   display: flex;
   flex-direction: column;
@@ -381,7 +503,6 @@ const FormRow = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
-
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
@@ -401,7 +522,6 @@ const StyledField = styled(Field)`
   font-size: 1rem;
   font-family: inherit;
   transition: border-color 0.3s;
-
   &:focus {
     outline: none;
     border-color: #d32f2f;
@@ -432,13 +552,10 @@ const Select = styled.select`
   background-color: white;
   cursor: pointer;
   appearance: none;
-
   &:focus {
     outline: none;
     border-color: #d32f2f;
   }
-
-  /* Add dropdown arrow */
   background-image: url("data:image/svg+xml;utf8,<svg fill='black' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
   background-repeat: no-repeat;
   background-position: right 8px center;
@@ -494,7 +611,6 @@ const TermsLabel = styled.label`
 const TermsLink = styled(Link)`
   color: #d32f2f;
   text-decoration: none;
-
   &:hover {
     text-decoration: underline;
   }
@@ -511,11 +627,9 @@ const PlaceOrderButton = styled.button`
   cursor: pointer;
   transition: background-color 0.3s;
   margin-top: 1rem;
-
   &:hover {
     background-color: #b71c1c;
   }
-
   &:disabled {
     background-color: #e57373;
     cursor: not-allowed;

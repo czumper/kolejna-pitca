@@ -3,30 +3,50 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import styled from "styled-components";
 import { fetchUserOrders } from "../features/orders/ordersSlice";
-import { formatDate } from "../utils/formatters";
+import { formatDate } from "../utils/formatters"; // Poprawny import
 
 const UserOrdersPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isAuthenticated } = useSelector((state) => state.auth);
-  const { orders, loading } = useSelector((state) => state.orders);
+  const { isAuthenticated } = useSelector((state) => state.auth || {});
+  const ordersState = useSelector(
+    (state) =>
+      state.orders || {
+        userOrders: { results: [] },
+        loading: false,
+        error: null,
+      }
+  );
+  const { userOrders, loading, error } = ordersState;
+  const ordersList = userOrders?.results || [];
 
   useEffect(() => {
     if (!isAuthenticated) {
       navigate("/login?redirect=orders");
       return;
     }
-
     dispatch(fetchUserOrders());
   }, [dispatch, isAuthenticated, navigate]);
 
+  console.log(
+    "UserOrdersPage - ordersState:",
+    ordersState,
+    "ordersList:",
+    ordersList,
+    "loading:",
+    loading,
+    "error:",
+    error
+  );
+
   if (loading) return <Loading>Ładowanie twoich zamówień...</Loading>;
+  if (error) return <ErrorMessage>Wystąpił błąd: {error}</ErrorMessage>;
 
   return (
     <PageContainer>
       <h1>Moje zamówienia</h1>
 
-      {orders.length === 0 ? (
+      {ordersList.length === 0 ? (
         <EmptyState>
           <p>Nie dokonałeś jeszcze żadnego zamówienia.</p>
           <Link to="/menu">
@@ -35,20 +55,37 @@ const UserOrdersPage = () => {
         </EmptyState>
       ) : (
         <OrdersList>
-          {orders.map((order) => (
+          {ordersList.map((order) => (
             <OrderCard key={order.id}>
               <OrderHeader>
                 <h3>Zamówienie #{order.id}</h3>
-                <OrderStatus status={order.status}>{order.status}</OrderStatus>
+                <OrderStatus status={order.status}>
+                  {order.status === "preparing"
+                    ? "Przetwarzanie"
+                    : order.status === "out_for_delivery"
+                    ? "W dostawie"
+                    : order.status === "received"
+                    ? "Przyjęte"
+                    : order.status === "delivered"
+                    ? "Dostarczone"
+                    : order.status === "cancelled"
+                    ? "Anulowane"
+                    : order.status}
+                </OrderStatus>
               </OrderHeader>
               <OrderDetails>
                 <OrderField>
                   <label>Data:</label>
-                  <span>{formatDate(order.created_at)}</span>
+                  <span>
+                    {typeof formatDate === "function"
+                      ? formatDate(order.created_at)
+                      : new Date(order.created_at).toLocaleString("pl-PL")}{" "}
+                    {/* Zabezpieczenie */}
+                  </span>
                 </OrderField>
                 <OrderField>
                   <label>Suma:</label>
-                  <span>ZŁ{order.total_price.toFixed(2)}</span>
+                  <span>ZŁ{parseFloat(order.total_amount).toFixed(2)}</span>
                 </OrderField>
                 <OrderField>
                   <label>Adres dostawy:</label>
@@ -59,11 +96,6 @@ const UserOrdersPage = () => {
                 <Link to={`/orders/${order.id}`}>
                   <ViewOrderButton>Zobacz szczegóły</ViewOrderButton>
                 </Link>
-                {order.status === "pending" && (
-                  <Link to={`/orders/${order.id}/track`}>
-                    <TrackOrderButton>Śledź zamówienie</TrackOrderButton>
-                  </Link>
-                )}
               </OrderActions>
             </OrderCard>
           ))}
@@ -73,6 +105,7 @@ const UserOrdersPage = () => {
   );
 };
 
+// Styling (bez zmian)
 const PageContainer = styled.div`
   max-width: 1000px;
   margin: 2rem auto;
@@ -121,12 +154,13 @@ const OrderStatus = styled.div`
     switch (props.status) {
       case "delivered":
         return "background-color: #d4edda; color: #155724;";
-      case "processing":
+      case "preparing":
         return "background-color: #fff3cd; color: #856404;";
-      case "in_delivery":
+      case "out_for_delivery":
         return "background-color: #cce5ff; color: #004085;";
       case "cancelled":
         return "background-color: #f8d7da; color: #721c24;";
+      case "received":
       default:
         return "background-color: #e2e3e5; color: #383d41;";
     }
@@ -219,6 +253,15 @@ const Loading = styled.div`
   padding: 3rem;
   font-size: 1.2rem;
   color: #555;
+`;
+
+const ErrorMessage = styled.div`
+  text-align: center;
+  padding: 3rem;
+  font-size: 1.2rem;
+  color: #721c24;
+  background-color: #f8d7da;
+  border-radius: 8px;
 `;
 
 export default UserOrdersPage;

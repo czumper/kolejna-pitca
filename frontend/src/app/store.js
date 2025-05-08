@@ -5,6 +5,7 @@ import menuReducer from "../features/menu/menuSlice";
 import ordersReducer from "../features/orders/ordersSlice";
 import reviewsReducer from "../features/reviews/reviewsSlice";
 import profileReducer from "../features/profile/profileSlice";
+import addressReducer from "../features/addresses/addressSlice";
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
     orders: ordersReducer,
     reviews: reviewsReducer,
     profile: profileReducer,
+    addresses: addressReducer,
   },
 });
 

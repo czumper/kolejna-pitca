@@ -107,7 +107,7 @@ class AddressViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     
     def get_queryset(self):
-        return Address.objects.filter(user=self.request.user)
+        return Address.objects.filter(user=self.request.user).order_by('id')
     
     def perform_create(self, serializer):
         # If this is the first address or is_default is True, make it the default

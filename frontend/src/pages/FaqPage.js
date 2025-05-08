@@ -41,9 +41,10 @@ const FaqPage = () => {
           },
           {
             id: 5,
-            question: "Czy mogę wyznaczyć zamówienie na późniejszą godzinę?",
+            question:
+              "Przegrałem auto w kasynie, żona jeszcze nie wie, co robić?",
             answer:
-              "Tak, nawet do 7 dni do przodu, nie gwarantujemy, że nie zapomnimy.",
+              "Postaw drugie auto, graj do skutku ale nie zapomnij o pizzy podczas kręcenia",
           },
           {
             id: 6,
@@ -52,13 +53,24 @@ const FaqPage = () => {
           },
           {
             id: 7,
-            question: "Jak mogę dołączyć do waszego programu lojalnościowego?",
-            answer: "Jak będzie to bedziesz tam automatycznie.",
+            question: "Straciłem chęci do życia, co robić?",
+            answer: "Eee pizza jest dobra, zamów pizze.",
           },
           {
             id: 8,
             question: "Co jeżeli wystąpi problem z moim zamówieniem?",
             answer: "Nic, na szczęście wszyscy mają to w piździe.",
+          },
+          {
+            id: 9,
+            question: "Mam 17 lat, moja dziewczyna zaszła w ciążę, co robić?",
+            answer: "Zamów pizze, a potem sie zastanów.",
+          },
+          {
+            id: 10,
+            question: "Piję codziennie po 2 butelki piwa, czy to dużo?",
+            answer:
+              "Nie, to mało. Polecamy 4-pak plus pyszniutką pizze z Pitcerni",
           },
         ]);
         setLoading(false);

@@ -10,28 +10,24 @@ const OrderSuccessPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { currentOrder } = useSelector((state) => state.order);
+  const { currentOrder } = useSelector((state) => state.orders); // Poprawione na state.orders
 
-  // If someone refreshes the page or navigates directly here
-  // without an order, redirect to home
   useEffect(() => {
     if (!currentOrder) {
       navigate("/");
     }
 
-    // Clear the current order when leaving this page
     return () => {
       dispatch(clearCurrentOrder());
     };
   }, [currentOrder, dispatch, navigate]);
 
   if (!currentOrder) {
-    return null; // Component will redirect from the useEffect
+    return null;
   }
 
   const formatDate = (dateString) => {
     if (!dateString) return "Soon";
-
     const date = new Date(dateString);
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
@@ -42,39 +38,32 @@ const OrderSuccessPage = () => {
         <SuccessIcon>
           <FaCheck />
         </SuccessIcon>
-
         <h1>Zamówienie złożone!</h1>
-
         <p>
           Dziękujemy za zamówienie, twoja pizza jest przygotowywana i niedługo
           do ciebie wyruszy.
         </p>
-
         <OrderInfo>
           <InfoRow>
             <InfoLabel>Numer zamówienia:</InfoLabel>
             <InfoValue>#{orderId}</InfoValue>
           </InfoRow>
-
           <InfoRow>
             <InfoLabel>Szacowany czas dostawy:</InfoLabel>
             <InfoValue>
               {formatDate(currentOrder.estimated_delivery_time)}
             </InfoValue>
           </InfoRow>
-
           <InfoRow>
             <InfoLabel>Adres dostawy:</InfoLabel>
             <InfoValue>{currentOrder.delivery_address}</InfoValue>
           </InfoRow>
-
           <InfoRow>
             <InfoLabel>Suma:</InfoLabel>
             <InfoValue>
               ${parseFloat(currentOrder.total_amount).toFixed(2)}
             </InfoValue>
           </InfoRow>
-
           <InfoRow>
             <InfoLabel>Payment Method:</InfoLabel>
             <InfoValue>
@@ -84,13 +73,11 @@ const OrderSuccessPage = () => {
             </InfoValue>
           </InfoRow>
         </OrderInfo>
-
         <OrderStatus>
           <StatusText>
             Obecny status: <StatusValue>{currentOrder.status}</StatusValue>
           </StatusText>
         </OrderStatus>
-
         <TrackingInfo>
           <TrackingIcon>
             <FaPizzaSlice />
@@ -100,7 +87,6 @@ const OrderSuccessPage = () => {
             email który podałeś.
           </TrackingText>
         </TrackingInfo>
-
         <ButtonGroup>
           <TrackButton
             to={`/track-order?id=${orderId}&email=${encodeURIComponent(
@@ -109,7 +95,6 @@ const OrderSuccessPage = () => {
           >
             Śledź swoje zamówienie <FaArrowRight />
           </TrackButton>
-
           <HomeButton to="/">Kontynuuj zakupy</HomeButton>
         </ButtonGroup>
       </SuccessCard>
@@ -117,7 +102,6 @@ const OrderSuccessPage = () => {
   );
 };
 
-// Styled Components
 const PageContainer = styled.div`
   max-width: 800px;
   margin: 3rem auto;
@@ -130,12 +114,10 @@ const SuccessCard = styled.div`
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   padding: 2rem;
   text-align: center;
-
   h1 {
     margin: 1.5rem 0 1rem;
     color: #333;
   }
-
   p {
     color: #666;
     margin-bottom: 2rem;
@@ -166,11 +148,9 @@ const OrderInfo = styled.div`
 const InfoRow = styled.div`
   display: flex;
   margin-bottom: 0.75rem;
-
   &:last-child {
     margin-bottom: 0;
   }
-
   @media (max-width: 480px) {
     flex-direction: column;
     margin-bottom: 1rem;
@@ -181,7 +161,6 @@ const InfoLabel = styled.div`
   font-weight: 600;
   width: 35%;
   padding-right: 1rem;
-
   @media (max-width: 480px) {
     width: 100%;
     margin-bottom: 0.25rem;
@@ -214,7 +193,6 @@ const TrackingInfo = styled.div`
   border-radius: 8px;
   padding: 1rem;
   margin-bottom: 2rem;
-
   @media (max-width: 480px) {
     flex-direction: column;
     text-align: center;
@@ -225,7 +203,6 @@ const TrackingIcon = styled.div`
   color: #ffa000;
   font-size: 1.5rem;
   margin-right: 1rem;
-
   @media (max-width: 480px) {
     margin: 0 0 0.75rem 0;
   }
@@ -240,7 +217,6 @@ const ButtonGroup = styled.div`
   display: flex;
   justify-content: center;
   gap: 1rem;
-
   @media (max-width: 480px) {
     flex-direction: column;
   }
@@ -258,7 +234,6 @@ const TrackButton = styled(Link)`
   justify-content: center;
   gap: 0.5rem;
   transition: background-color 0.3s;
-
   &:hover {
     background-color: #b71c1c;
   }
@@ -273,7 +248,6 @@ const HomeButton = styled(Link)`
   font-weight: 500;
   border: 1px solid #ddd;
   transition: all 0.3s;
-
   &:hover {
     border-color: #999;
   }

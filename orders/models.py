@@ -25,9 +25,14 @@ class Order(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='received')
     payment_method = models.CharField(max_length=10, choices=PAYMENT_CHOICES, default='cash')
     total_amount = models.DecimalField(max_digits=8, decimal_places=2)
+    subtotal = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)  # Dodane
+    delivery_fee = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)  # Dodane
+    tax = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)  # Dodane
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)  # Dodane, bo jest w serializers.py
     estimated_delivery_time = models.DateTimeField(null=True, blank=True)
     delivered_at = models.DateTimeField(null=True, blank=True)
+    is_paid = models.BooleanField(default=False)  # Dodane, bo jest w admin.py
     
     def __str__(self):
         return f"Order #{self.id} - {self.customer_name}"

@@ -25,6 +25,7 @@ import ChangePasswordPage from "./pages/ChangePasswordPage";
 import ChangeEmailPage from "./pages/ChangeEmailPage";
 import EditProfilePage from "./pages/EditProfilePage";
 import UserOrdersPage from "./pages/UserOrdersPage";
+import OrderDetailsPage from "./pages/OrderDetailsPage"; // Nowy import
 import AddressesPage from "./pages/AddressesPage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
@@ -58,13 +59,9 @@ const App = () => {
             <Route path="/cart" element={<CartPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
-            <Route path="/activation" element={<ActivationPage />} />{" "}
-            {/* Poprawiona składnia */}
-            <Route
-              path="/activate/:uid/:token"
-              element={<ActivationPage />}
-            />{" "}
-            {/* Poprawiona składnia */}
+            <Route path="/activation" element={<ActivationPage />} />
+            <Route path="/activate/:uid/:token" element={<ActivationPage />} />
+
             {/* Protected routes */}
             <Route
               path="/checkout"
@@ -111,6 +108,14 @@ const App = () => {
               element={
                 <PrivateRoute>
                   <UserOrdersPage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/orders/:id"
+              element={
+                <PrivateRoute>
+                  <OrderDetailsPage />
                 </PrivateRoute>
               }
             />

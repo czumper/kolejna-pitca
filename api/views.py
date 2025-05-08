@@ -3,7 +3,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Category, Pizza, Topping, Order, OrderItem
+from .models import Category, Pizza, Topping
+from orders.models import Order, OrderItem  # Zmiana importu
 from .serializers import (
     CategorySerializer, PizzaListSerializer, PizzaDetailSerializer,
     ToppingSerializer, OrderSerializer, OrderCreateSerializer
@@ -32,11 +33,9 @@ class PizzaViewSet(viewsets.ReadOnlyModelViewSet):
     def featured(self, request):
         featured_pizzas = Pizza.objects.filter(is_featured=True, available=True)
         page = self.paginate_queryset(featured_pizzas)
-        
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
-        
         serializer = self.get_serializer(featured_pizzas, many=True)
         return Response(serializer.data)
     
@@ -44,11 +43,9 @@ class PizzaViewSet(viewsets.ReadOnlyModelViewSet):
     def vegetarian(self, request):
         vegetarian_pizzas = Pizza.objects.filter(is_vegetarian=True, available=True)
         page = self.paginate_queryset(vegetarian_pizzas)
-        
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
-        
         serializer = self.get_serializer(vegetarian_pizzas, many=True)
         return Response(serializer.data)
     
@@ -56,12 +53,10 @@ class PizzaViewSet(viewsets.ReadOnlyModelViewSet):
     def by_category(self, request, category_slug=None):
         category = get_object_or_404(Category, slug=category_slug)
         pizzas = self.get_queryset().filter(category=category)
-        
         page = self.paginate_queryset(pizzas)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
-        
         serializer = self.get_serializer(pizzas, many=True)
         return Response(serializer.data)
 
@@ -98,41 +93,33 @@ class OrderViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
-        # Link the order to the user if authenticated
         if request.user.is_authenticated:
             serializer.validated_data['user'] = request.user
-        
         order = serializer.save()
-        
         headers = self.get_success_headers(serializer.data)
         return Response(
             self.get_serializer_class()(order).data,
-            status=status.HTTP_201_CREATED, 
+            status=status.HTTP_201_CREATED,
             headers=headers
         )
     
     @action(detail=False, methods=['get'])
     def my_orders(self, request):
-        """Return orders for the currently authenticated user"""
         if not request.user.is_authenticated:
             return Response(
                 {"error": "Authentication required"},
                 status=status.HTTP_401_UNAUTHORIZED
             )
-            
         orders = Order.objects.filter(user=request.user)
         page = self.paginate_queryset(orders)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
-        
         serializer = self.get_serializer(orders, many=True)
         return Response(serializer.data)
     
     @action(detail=True, methods=['get'], url_path='track/(?P<email>[^/.]+)')
     def track_order(self, request, pk=None, email=None):
-        """Allow customers to track their order using order ID and email"""
         try:
             order = Order.objects.get(pk=pk, customer_email=email)
             serializer = self.get_serializer(order)

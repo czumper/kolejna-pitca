@@ -7,7 +7,7 @@ import { fetchUserProfile } from "../features/profile/profileSlice";
 const UserProfilePage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const { isAuthenticated } = useSelector((state) => state.auth);
   const { profile, loading } = useSelector((state) => state.profile);
 
   useEffect(() => {
@@ -19,7 +19,11 @@ const UserProfilePage = () => {
     dispatch(fetchUserProfile());
   }, [dispatch, isAuthenticated, navigate]);
 
+  console.log("ProfilePage - profile:", profile, "loading:", loading); // Debug
+
   if (loading) return <Loading>Ładowanie profilu...</Loading>;
+
+  if (!profile) return <ErrorMessage>Brak danych profilu.</ErrorMessage>;
 
   return (
     <ProfileContainer>
@@ -30,16 +34,16 @@ const UserProfilePage = () => {
         <ProfileField>
           <Label>Imię:</Label>
           <span>
-            {user?.first_name} {user?.last_name}
+            {profile?.first_name} {profile?.last_name}
           </span>
         </ProfileField>
         <ProfileField>
           <Label>Nazwa użytkownika:</Label>
-          <span>{user?.username}</span>
+          <span>{profile?.username}</span>
         </ProfileField>
         <ProfileField>
           <Label>Email:</Label>
-          <span>{user?.email}</span>
+          <span>{profile?.email}</span>
         </ProfileField>
       </ProfileSection>
 
@@ -136,6 +140,15 @@ const Loading = styled.div`
   padding: 3rem;
   font-size: 1.2rem;
   color: #555;
+`;
+
+const ErrorMessage = styled.div`
+  text-align: center;
+  padding: 3rem;
+  font-size: 1.2rem;
+  color: #721c24;
+  background-color: #f8d7da;
+  border-radius: 8px;
 `;
 
 export default UserProfilePage;

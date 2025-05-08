@@ -66,7 +66,6 @@ const Footer = () => {
             <FooterLink to="/menu">Menu</FooterLink>
             <FooterLink to="/about">O nas</FooterLink>
             <FooterLink to="/contact">Kontakt</FooterLink>
-            <FooterLink to="/track-order">Śledź zamówienie</FooterLink>
           </FooterLinks>
         </FooterColumn>
 
@@ -74,9 +73,13 @@ const Footer = () => {
           <FooterHeading>Obsługa klienta</FooterHeading>
           <FooterLinks>
             <FooterLink to="/faq">FAQs</FooterLink>
-            <FooterLink to="/terms">Warunki i wymagania</FooterLink>
-            <FooterLink to="/privacy">Polityka Prywatności</FooterLink>
-            <FooterLink to="/refund-policy">Polityka zwrotów</FooterLink>
+            <FooterLink to="https://youtu.be/a1nztJ6Nco0?si=CFhmq_A5TztCKh0r">
+              Jak powstaje dźwig osobowy?
+            </FooterLink>
+            <FooterLink to="https://10minutemail.net/?lang=pl">
+              Tymczasowy mail
+            </FooterLink>
+            <FooterLink to="https://chatgpt.com/">Czat GPT</FooterLink>
           </FooterLinks>
         </FooterColumn>
 
@@ -109,7 +112,7 @@ const Footer = () => {
 
       <FooterBottom>
         <Copyright>
-          &copy; {currentYear} Pitcernia. Prawa zastrzeżone.
+          &copy; {currentYear} Pitcernia. W prawa mam wyjebane.
         </Copyright>
         <PaymentMethods>
           <span>Metody płatności:</span> Bling bling, Bliczek, Sztynks,
