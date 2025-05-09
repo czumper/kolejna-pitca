@@ -88,8 +88,8 @@ const apiService = {
   register: (userData) => api.post("/auth/register/", userData),
   login: (credentials) => api.post("/auth/jwt/create/", credentials),
   activateAccount: (data) => api.post("/auth/users/activation/", data),
-  getUserProfile: () => api.get("/auth/user/"),
-  updateUserProfile: (profileData) => api.patch("/auth/user/", profileData),
+  getUserProfile: () => api.get("/auth/users/me/"), // Poprawiony endpoint
+  updateUserProfile: (profileData) => api.patch("/auth/users/me/", profileData),
   changePassword: (passwordData) =>
     api.post("/auth/password/change/", passwordData),
   changeEmail: (emailData) => api.post("/auth/email/change/", emailData),
