@@ -1,7 +1,8 @@
 .gitignore
 # dependencies
 /frontend/node_modules
-
+/migrations
+/pitcernia_django/urls.py
 .pnp.js
 /frontend/coverage
 /env
