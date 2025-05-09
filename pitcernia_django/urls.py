@@ -12,7 +12,7 @@ from django.views.static import serve
 
 # API Router
 router = DefaultRouter()
-router.register(r'auth/user', UserViewSet, basename='user')
+#router.register(r'auth/user', UserViewSet, basename='user')
 router.register(r'addresses', AddressViewSet, basename='address')
 router.register(r'menu/categories', CategoryViewSet, basename='category')
 router.register(r'menu/toppings', ToppingViewSet, basename='topping')
@@ -31,6 +31,7 @@ urlpatterns = [
     path('', TemplateView.as_view(template_name='index.html')),
     re_path(r'^(?!api/).*$', TemplateView.as_view(template_name='index.html'), name='index'),
     path('api/auth/check-username/', CheckUsernameView.as_view(), name='check-username'),
+    path('api/auth/', include('accounts.urls')),
 #    path('', serve, {'document_root': settings.STATICFILES_DIRS[0], 'path': 'index.html'}),
 ]
 
